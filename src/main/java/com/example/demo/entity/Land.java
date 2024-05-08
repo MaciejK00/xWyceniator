@@ -1,9 +1,11 @@
-package com.example.demo;
+package com.example.demo.entity;
 
+
+import java.util.List;
 
 public class Land {
     String city;
-    String[] media;
+    List<String> media;
     String type;
     Long size;
 
@@ -15,11 +17,11 @@ public class Land {
         this.city = city;
     }
 
-    public String[] getMedia() {
+    public List<String> getMedia() {
         return media;
     }
 
-    public void setMedia(String[] media) {
+    public void setMedia(List<String> media) {
         this.media = media;
     }
 

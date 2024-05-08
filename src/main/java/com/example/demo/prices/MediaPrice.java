@@ -1,8 +1,6 @@
-package com.example.demo;
+package com.example.demo.prices;
 
-
-public class Cena {
-
+public class MediaPrice {
     Double price;
 
     public Double getPrice() {

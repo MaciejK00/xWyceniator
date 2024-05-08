@@ -1,0 +1,19 @@
+import com.example.demo.entity.Land;
+global com.example.demo.prices.MediaPrice mediaPrice;
+
+rule "Power rule"
+    when
+        Land(media contains "Prąd")
+        Land(media contains "Woda")
+    then
+    mediaPrice.setPrice(350.0);
+end
+
+rule "All rule"
+    when
+        Land(media contains "Prąd")
+        Land(media contains "Woda")
+        Land(media contains "Gaz")
+    then
+    mediaPrice.setPrice(1350.0);
+end

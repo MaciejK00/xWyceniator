@@ -1,5 +1,9 @@
-package com.example.demo;
+package com.example.demo.view;
 
+import com.example.demo.entity.Land;
+import com.example.demo.prices.MediaPrice;
+import com.example.demo.prices.TypePrice;
+import com.example.demo.service.LandService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -22,6 +26,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.MaxWidth;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @PageTitle("Checkout Form")
@@ -69,12 +74,18 @@ public class CheckoutFormView extends Div {
         ComboBox<String> comboBox = new ComboBox<>("Miasto");
         comboBox.setItems(Arrays.asList("Warszawa", "Białystok", "Poznań", "Wrocław"));
 
-
+        Land land = new Land();
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setLabel("Media");
-        checkboxGroup.setItems("Prąg", "Gaz", "Woda");
+        checkboxGroup.setItems("Prąd", "Gaz", "Woda");
+        checkboxGroup.addValueChangeListener(e ->{
+            LandService landService = new LandService();
+            land.setMedia(new ArrayList<>(e.getValue()));
+            MediaPrice mediaPrice = new MediaPrice();
+            landService.suggestMediaPrice(land, mediaPrice);
+        });
 
-        Land land = new Land();
+
 
         H2 price = new H2("Cena:");
         HorizontalLayout horizontalLayout = new HorizontalLayout();
@@ -90,8 +101,8 @@ public class CheckoutFormView extends Div {
         radioGroup.addValueChangeListener(e -> {
             LandService landService = new LandService();
             land.setType(e.getValue());
-            Cena cena = new Cena();
-            paragraph.setText(landService.suggestPrice(land, cena).getPrice().toString());
+            TypePrice typePrice = new TypePrice();
+            paragraph.setText(landService.suggestTypePrice(land, typePrice).getPrice().toString());
         });
 
         IntegerField integerField = new IntegerField();

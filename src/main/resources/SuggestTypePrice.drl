@@ -1,13 +1,13 @@
 
-import com.example.demo.Land;
-global com.example.demo.Cena cena;
+import com.example.demo.entity.Land;
+global com.example.demo.prices.TypePrice typePrice;
 
 rule "Cena za rolna"
     when
         Land(type == "Rolna")
 
     then
-        cena.setPrice(200.0);
+        typePrice.setPrice(200.0);
 end
 
 rule "Cena za budowlana"
@@ -15,7 +15,7 @@ rule "Cena za budowlana"
         Land(type == "Budowlana")
 
     then
-        cena.setPrice(1200.0);
+        typePrice.setPrice(1200.0);
 end
 
 
