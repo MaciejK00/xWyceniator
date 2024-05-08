@@ -1,0 +1,21 @@
+
+import com.example.demo.Land;
+global com.example.demo.Cena cena;
+
+rule "Cena za rolna"
+    when
+        Land(type == "Rolna")
+
+    then
+        cena.setPrice(200.0);
+end
+
+rule "Cena za budowlana"
+    when
+        Land(type == "Budowlana")
+
+    then
+        cena.setPrice(1200.0);
+end
+
+
