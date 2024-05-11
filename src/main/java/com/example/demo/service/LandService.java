@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
+import com.example.demo.config.DroolsBeanFactory;
 import com.example.demo.entity.Land;
 import com.example.demo.prices.MediaPrice;
+import com.example.demo.prices.SizePrice;
 import com.example.demo.prices.TypePrice;
+import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
-import com.example.demo.config.DroolsBeanFactory;
 
 public class LandService {
 
@@ -34,5 +36,18 @@ public class LandService {
         System.out.println(mediaPrice.getPrice());
         return mediaPrice;
 
+    }
+
+        public SizePrice suggestSizePrice(Land land, SizePrice sizePrice) {
+        KieSession kieSession = new DroolsBeanFactory().getKieSession();
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("sizePrice", sizePrice);
+            kieSession.fireAllRules();
+        } finally {
+            kieSession.dispose();
+        }
+        System.out.println(sizePrice.getPrice());
+        return sizePrice;
     }
 }

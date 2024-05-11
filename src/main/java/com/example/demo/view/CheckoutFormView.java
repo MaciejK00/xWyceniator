@@ -2,6 +2,7 @@ package com.example.demo.view;
 
 import com.example.demo.entity.Land;
 import com.example.demo.prices.MediaPrice;
+import com.example.demo.prices.SizePrice;
 import com.example.demo.prices.TypePrice;
 import com.example.demo.service.LandService;
 import com.vaadin.flow.component.Component;
@@ -32,8 +33,6 @@ import java.util.Arrays;
 @PageTitle("Checkout Form")
 @Route("")
 public class CheckoutFormView extends Div {
-
-
 
     public CheckoutFormView() {
         addClassNames("checkout-form-view");
@@ -75,10 +74,12 @@ public class CheckoutFormView extends Div {
         comboBox.setItems(Arrays.asList("Warszawa", "Białystok", "Poznań", "Wrocław"));
 
         Land land = new Land();
+        Paragraph paragraph = new Paragraph();
+
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setLabel("Media");
-        checkboxGroup.setItems("Prąd", "Gaz", "Woda");
-        checkboxGroup.addValueChangeListener(e ->{
+        checkboxGroup.setItems("Prąd", "Gaz", "Woda", "Kanalizacja");
+        checkboxGroup.addValueChangeListener(e -> {
             LandService landService = new LandService();
             land.setMedia(new ArrayList<>(e.getValue()));
             MediaPrice mediaPrice = new MediaPrice();
@@ -90,13 +91,12 @@ public class CheckoutFormView extends Div {
         H2 price = new H2("Cena:");
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.add(price);
-        Paragraph paragraph = new Paragraph();
         horizontalLayout.add(paragraph);
-
+        horizontalLayout.getStyle().set("padding-top", "30px");
 
         RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
         radioGroup.setLabel("Rodzaj");
-        radioGroup.setItems("Rolna", "Budowlana");
+        radioGroup.setItems("Rolna", "Budowlana", "Lesna", "Rekreacyjna", "Inwestycyjna", "Siedliskowa");
         radioGroup.setValue("Budowlana");
         radioGroup.addValueChangeListener(e -> {
             LandService landService = new LandService();
@@ -105,14 +105,40 @@ public class CheckoutFormView extends Div {
             paragraph.setText(landService.suggestTypePrice(land, typePrice).getPrice().toString());
         });
 
+        RadioButtonGroup<String> shapeRadioGroup = new RadioButtonGroup<>();
+        shapeRadioGroup.setLabel("Kształt działki");
+        shapeRadioGroup.setItems("Regularny", "Nieregularny");
+        shapeRadioGroup.setValue("Budowlana");
+        shapeRadioGroup.addValueChangeListener(e -> {
+//            LandService landService = new LandService();
+//            land.setType(e.getValue());
+//            TypePrice typePrice = new TypePrice();
+//            paragraph.setText(landService.suggestTypePrice(land, typePrice).getPrice().toString());
+        });
+
         IntegerField integerField = new IntegerField();
         integerField.setValue(1);
         integerField.setStepButtonsVisible(true);
         integerField.setMin(1);
         integerField.setLabel("Wielkość w m2");
+        integerField.addValueChangeListener(e -> {
+            LandService landService = new LandService();
+            land.setSize(e.getValue().longValue());
+            SizePrice sizePrice = new SizePrice();
+            paragraph.setText(landService.suggestSizePrice(land, sizePrice).getPrice().toString());
+        });
 
+        CheckboxGroup<String> surroundingsCheckboxGroup = new CheckboxGroup<>();
+        surroundingsCheckboxGroup.setLabel("Infrastruktura drogowa");
+        surroundingsCheckboxGroup.setItems("Droga ekspresowa w okolicy", "Autostrada w okolicy", "Dojazd drogą asfaltowa");
+        surroundingsCheckboxGroup.addValueChangeListener(e ->{
+//            LandService landService = new LandService();
+//            land.setMedia(new ArrayList<>(e.getValue()));
+//            MediaPrice mediaPrice = new MediaPrice();
+//            landService.suggestMediaPrice(land, mediaPrice);
+        });
 
-        personalDetails.add(header, comboBox, checkboxGroup, radioGroup, integerField, horizontalLayout);
+        personalDetails.add(header, comboBox, checkboxGroup, radioGroup, integerField, surroundingsCheckboxGroup, shapeRadioGroup, horizontalLayout);
         return personalDetails;
     }
 

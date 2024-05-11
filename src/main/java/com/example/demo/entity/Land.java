@@ -8,6 +8,7 @@ public class Land {
     List<String> media;
     String type;
     Long size;
+    Double totalPrice;
 
     public String getCity() {
         return city;
@@ -39,5 +40,13 @@ public class Land {
 
     public void setSize(Long size) {
         this.size = size;
+    }
+
+    public Double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }

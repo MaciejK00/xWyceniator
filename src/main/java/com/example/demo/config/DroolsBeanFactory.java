@@ -15,11 +15,11 @@ import org.kie.internal.io.ResourceFactory;
 
 public class DroolsBeanFactory {
 
-    private KieServices kieServices = KieServices.Factory.get();
+    private final KieServices kieServices = KieServices.Factory.get();
 
     private KieFileSystem getKieFileSystem() {
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
-        List<String> rules = List.of("SuggestTypePrice.drl", "SuggestMediaPrice.drl");
+        List<String> rules = List.of("SuggestTypePrice.drl", "SuggestMediaPrice.drl", "SuggestSizePrice.drl");
         for (String rule : rules) {
             kieFileSystem.write(ResourceFactory.newClassPathResource(rule));
         }

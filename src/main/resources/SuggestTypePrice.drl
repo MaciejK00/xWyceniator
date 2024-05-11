@@ -1,7 +1,8 @@
 
 import com.example.demo.entity.Land;
 global com.example.demo.prices.TypePrice typePrice;
-
+global com.example.demo.prices.MediaPrice mediaPrice;
+global com.example.demo.prices.SizePrice sizePrice;
 rule "Cena za rolna"
     when
         Land(type == "Rolna")
@@ -18,4 +19,34 @@ rule "Cena za budowlana"
         typePrice.setPrice(1200.0);
 end
 
+rule "Cena za siedliskowa"
+    when
+        Land(type == "Siedliskowa")
 
+    then
+        typePrice.setPrice(400.0);
+end
+
+rule "Cena za inwestycyjna"
+    when
+        Land(type == "Inwestycyjna")
+
+    then
+        typePrice.setPrice(450.0);
+end
+
+rule "Cena za lesna"
+    when
+        Land(type == "Lesna")
+
+    then
+        typePrice.setPrice(300.0);
+end
+
+rule "Cena za rekreacyjna"
+    when
+        Land(type == "Rekreacyjna")
+
+    then
+        typePrice.setPrice(500.0);
+end

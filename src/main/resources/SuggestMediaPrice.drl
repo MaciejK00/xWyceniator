@@ -1,19 +1,89 @@
 import com.example.demo.entity.Land;
+global com.example.demo.prices.TypePrice typePrice;
 global com.example.demo.prices.MediaPrice mediaPrice;
-
+global com.example.demo.prices.SizePrice sizePrice;
 rule "Power rule"
+    when
+        Land(media contains "Prąd")
+    then
+        mediaPrice.setPrice(100.0);
+end
+
+rule "Water rule"
+    when
+        Land(media contains "Woda")
+    then
+        mediaPrice.setPrice(200.0);
+end
+
+rule "Gas rule"
+    when
+        Land(media contains "Gaz")
+    then
+        mediaPrice.setPrice(300.0);
+end
+
+rule "Sewage rule"
+    when
+        Land(media contains "Kanalizacja")
+    then
+        mediaPrice.setPrice(400.0);
+end
+
+rule "Power and Water rule"
     when
         Land(media contains "Prąd")
         Land(media contains "Woda")
     then
-    mediaPrice.setPrice(350.0);
+        mediaPrice.setPrice(350.0);
 end
 
-rule "All rule"
+rule "Power and Gas rule"
+    when
+        Land(media contains "Prąd")
+        Land(media contains "Gaz")
+    then
+        mediaPrice.setPrice(400.0);
+end
+
+rule "Power and Sewage rule"
+    when
+        Land(media contains "Prąd")
+        Land(media contains "Kanalizacja")
+    then
+        mediaPrice.setPrice(450.0);
+end
+
+rule "Water and Gas rule"
+    when
+        Land(media contains "Woda")
+        Land(media contains "Gaz")
+    then
+        mediaPrice.setPrice(500.0);
+end
+
+rule "Water and Sewage rule"
+    when
+        Land(media contains "Woda")
+        Land(media contains "Kanalizacja")
+    then
+        mediaPrice.setPrice(550.0);
+end
+
+rule "Gas and Sewage rule"
+    when
+        Land(media contains "Gaz")
+        Land(media contains "Kanalizacja")
+    then
+        mediaPrice.setPrice(600.0);
+end
+
+rule "All Utilities rule"
     when
         Land(media contains "Prąd")
         Land(media contains "Woda")
         Land(media contains "Gaz")
+        Land(media contains "Kanalizacja")
     then
-    mediaPrice.setPrice(1350.0);
+        mediaPrice.setPrice(1350.0);
 end
