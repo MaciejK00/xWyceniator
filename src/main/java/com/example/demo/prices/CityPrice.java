@@ -1,13 +1,13 @@
 package com.example.demo.prices;
 
 public class CityPrice {
-    Double price;
+    private Integer multiplier;
 
-    public Double getPrice() {
-        return price;
+    public Integer getMultiplier() {
+        return multiplier;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setMultiplier(Integer price) {
+        this.multiplier = price;
     }
 }

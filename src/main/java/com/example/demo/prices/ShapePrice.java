@@ -1,15 +1,13 @@
 package com.example.demo.prices;
 
-
 public class ShapePrice {
+    private Double shapeMultiplier;
 
-    Double price;
-
-    public Double getPrice() {
-        return price;
+    public Double getShapeMultiplier() {
+        return shapeMultiplier;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setShapeMultiplier(Double shapeMultiplier) {
+        this.shapeMultiplier = shapeMultiplier;
     }
 }

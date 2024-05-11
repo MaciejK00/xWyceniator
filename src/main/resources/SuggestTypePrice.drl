@@ -1,52 +1,29 @@
-
 import com.example.demo.entity.Land;
+import com.example.demo.prices.TypePrice;
+import com.example.demo.common.TypeEnum;
+
 global com.example.demo.prices.TypePrice typePrice;
-global com.example.demo.prices.MediaPrice mediaPrice;
-global com.example.demo.prices.SizePrice sizePrice;
-rule "Cena za rolna"
-    when
-        Land(type == "Rolna")
 
-    then
-        typePrice.setPrice(200.0);
+declare LandTypePrice
+    type : String
+    price : Double
 end
 
-rule "Cena za budowlana"
+rule "Init data"
     when
-        Land(type == "Budowlana")
-
     then
-        typePrice.setPrice(1200.0);
+        insert(new LandTypePrice(TypeEnum.AGRICULTURAL.getName(), 10000.0));
+        insert(new LandTypePrice(TypeEnum.BUILDING.getName(), 15000.0));
+        insert(new LandTypePrice(TypeEnum.HABITAT.getName(), 1000.0));
+        insert(new LandTypePrice(TypeEnum.INVESTMENT.getName(), 20000.0));
+        insert(new LandTypePrice(TypeEnum.FOREST.getName(), 2000.0));
+        insert(new LandTypePrice(TypeEnum.LEISURE.getName(), 3500.0));
 end
 
-rule "Cena za siedliskowa"
+rule "Type price"
     when
-        Land(type == "Siedliskowa")
-
+        Land($type : type)
+        LandTypePrice(type == $type, $price : price)
     then
-        typePrice.setPrice(400.0);
-end
-
-rule "Cena za inwestycyjna"
-    when
-        Land(type == "Inwestycyjna")
-
-    then
-        typePrice.setPrice(450.0);
-end
-
-rule "Cena za lesna"
-    when
-        Land(type == "Lesna")
-
-    then
-        typePrice.setPrice(300.0);
-end
-
-rule "Cena za rekreacyjna"
-    when
-        Land(type == "Rekreacyjna")
-
-    then
-        typePrice.setPrice(500.0);
+        typePrice.setPrice($price);
 end

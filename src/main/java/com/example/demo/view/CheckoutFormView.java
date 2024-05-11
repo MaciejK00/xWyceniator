@@ -1,9 +1,7 @@
 package com.example.demo.view;
 
 import com.example.demo.entity.Land;
-import com.example.demo.prices.MediaPrice;
-import com.example.demo.prices.SizePrice;
-import com.example.demo.prices.TypePrice;
+import com.example.demo.prices.*;
 import com.example.demo.service.LandService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -30,116 +28,203 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-@PageTitle("Checkout Form")
+import static com.example.demo.common.Dictionary.*;
+import static com.example.demo.common.MediaEnum.*;
+import static com.example.demo.common.CityEnum.*;
+import static com.example.demo.common.SurroundingsEnum.*;
+import static com.example.demo.common.ShapeEnum.*;
+import static com.example.demo.common.TypeEnum.*;
+
+@PageTitle("Wyceniator")
 @Route("")
 public class CheckoutFormView extends Div {
+    private Land land;
+    private Paragraph paragraph;
 
     public CheckoutFormView() {
-        addClassNames("checkout-form-view");
-        addClassNames(Display.FLEX, FlexDirection.COLUMN, Height.FULL);
+        this.addClassNames(Display.FLEX, FlexDirection.COLUMN, Height.FULL);
 
-        Main content = new Main();
+        final Main content = new Main();
         content.addClassNames(Display.GRID, Gap.XLARGE, AlignItems.START, JustifyContent.CENTER, MaxWidth.SCREEN_MEDIUM,
                 Margin.Horizontal.AUTO, Padding.Bottom.LARGE, Padding.Horizontal.LARGE);
 
-        content.add(createCheckoutForm());
-        add(content);
+        content.add(createMainForm());
+        this.add(content);
     }
 
-    private Component createCheckoutForm() {
-        Section checkoutForm = new Section();
+    private Component createMainForm() {
+        final Section checkoutForm = new Section();
         checkoutForm.addClassNames(Display.FLEX, FlexDirection.COLUMN, Flex.GROW);
 
-        H2 header = new H2("Wycena działki");
+        final H2 header = new H2(LAND_PRICE);
         header.addClassNames(Margin.Bottom.NONE, Margin.Top.XLARGE, FontSize.XXXLARGE);
-        Paragraph note = new Paragraph("podaj szczegóły i wyceń swoją działke!");
-        note.addClassNames(Margin.Bottom.XLARGE, Margin.Top.NONE, TextColor.SECONDARY);
-        checkoutForm.add(header, note);
 
-        checkoutForm.add(createPersonalDetailsSection());
+        final Paragraph note = new Paragraph(GIVE_DETAILS);
+        note.addClassNames(Margin.Bottom.XLARGE, Margin.Top.NONE, TextColor.SECONDARY);
+
+        checkoutForm.add(header, note);
+        checkoutForm.add(createFormDetails());
 
         return checkoutForm;
     }
 
-    private Section createPersonalDetailsSection() {
-        Section personalDetails = new Section();
-        personalDetails.addClassNames(Display.FLEX, FlexDirection.COLUMN, Margin.Bottom.XLARGE, Margin.Top.MEDIUM);
+    private Section createFormDetails() {
+        final Section formDetails = this.prepareFormDetails();
+        final H3 header = this.prepareSiteHeader();
 
+        this.land = this.prepareLand();
+        this.paragraph = new Paragraph();
 
-        H3 header = new H3("Sczegóły działki");
-        header.addClassNames(Margin.Bottom.MEDIUM, Margin.Top.SMALL, FontSize.XXLARGE);
+        final IntegerField sizeField = prepareSizeField();
+        final ComboBox<String> cityBox = this.prepareCityBox();
+        final CheckboxGroup<String> mediaCheckboxGroup = this.prepareMediaCheckboxGroup();
+        final RadioButtonGroup<String> typeRadioGroup = this.prepareTypeRadioGroup();
+        final CheckboxGroup<String> surroundingsCheckboxGroup = this.prepareShapeCheckboxGroup();
+        final RadioButtonGroup<String> shapeRadioGroup = this.prepareShapeRadioGroup();
 
+        final HorizontalLayout horizontalLayout = preparePriceHeader(paragraph);
 
-        ComboBox<String> comboBox = new ComboBox<>("Miasto");
-        comboBox.setItems(Arrays.asList("Warszawa", "Białystok", "Poznań", "Wrocław"));
+        formDetails.add(header, sizeField, cityBox, mediaCheckboxGroup, typeRadioGroup, surroundingsCheckboxGroup, shapeRadioGroup, horizontalLayout);
+        return formDetails;
+    }
 
-        Land land = new Land();
-        Paragraph paragraph = new Paragraph();
+    private CheckboxGroup<String> prepareShapeCheckboxGroup() {
+        final CheckboxGroup<String> surroundingsCheckboxGroup = new CheckboxGroup<>();
+        surroundingsCheckboxGroup.setLabel(INFRASTRUCTURE);
+        surroundingsCheckboxGroup.setItems(EXPRESS.getName(), HIGHWAY.getName(), TARMAC.getName());
 
-        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
-        checkboxGroup.setLabel("Media");
-        checkboxGroup.setItems("Prąd", "Gaz", "Woda", "Kanalizacja");
-        checkboxGroup.addValueChangeListener(e -> {
-            LandService landService = new LandService();
-            land.setMedia(new ArrayList<>(e.getValue()));
-            MediaPrice mediaPrice = new MediaPrice();
-            landService.suggestMediaPrice(land, mediaPrice);
+        surroundingsCheckboxGroup.addValueChangeListener(e -> {
+            final LandService landService = new LandService();
+            land.setSurroundings(new ArrayList<>(e.getValue()));
+            SurroundingsPrice surroundingsPrice = new SurroundingsPrice();
+            land.setSurroundingsPrice(landService.suggestSurroundingsPrice(land, surroundingsPrice).getPrice());
+            paragraph.setText(this.calculatePrice(land).toString());
         });
 
+        return surroundingsCheckboxGroup;
+    }
 
+    private RadioButtonGroup<String> prepareShapeRadioGroup() {
+        final RadioButtonGroup<String> shapeRadioGroup = new RadioButtonGroup<>();
+        shapeRadioGroup.setLabel(LAND_SHAPE);
+        shapeRadioGroup.setItems(REGULAR.getName(), IRREGULAR.getName());
 
-        H2 price = new H2("Cena:");
+        shapeRadioGroup.addValueChangeListener(e -> {
+            final LandService landService = new LandService();
+            land.setRegular(e.getValue().equals(REGULAR.getName()));
+            ShapePrice shapePrice = new ShapePrice();
+            land.setShapeMultiplier(landService.suggestShapePrice(land, shapePrice).getShapeMultiplier());
+            paragraph.setText(this.calculatePrice(land).toString());
+        });
+
+        return shapeRadioGroup;
+    }
+
+    private RadioButtonGroup<String> prepareTypeRadioGroup() {
+        final RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
+        radioGroup.setLabel(TYPE);
+        radioGroup.setItems(AGRICULTURAL.getName(), BUILDING.getName(), FOREST.getName(), LEISURE.getName(),
+                INVESTMENT.getName(), HABITAT.getName());
+
+        radioGroup.addValueChangeListener(e -> {
+            final LandService landService = new LandService();
+            land.setType(e.getValue());
+            TypePrice typePrice = new TypePrice();
+            land.setTypePrice(landService.suggestTypePrice(land, typePrice).getPrice());
+            paragraph.setText(this.calculatePrice(land).toString());
+        });
+
+        return radioGroup;
+    }
+
+    private CheckboxGroup<String> prepareMediaCheckboxGroup() {
+        final CheckboxGroup<String> mediaCheckBox = new CheckboxGroup<>();
+        mediaCheckBox.setLabel(MEDIA);
+        mediaCheckBox.setItems(POWER.getName(), GAS.getName(), WATER.getName(), SEWER.getName());
+
+        mediaCheckBox.addValueChangeListener(e -> {
+            final LandService landService = new LandService();
+            land.setMedia(new ArrayList<>(e.getValue()));
+            MediaPrice mediaPrice = new MediaPrice();
+            land.setMediaPrice(landService.suggestMediaPrice(land, mediaPrice).getPrice());
+            paragraph.setText(this.calculatePrice(land).toString());
+        });
+
+        return mediaCheckBox;
+    }
+
+    private ComboBox<String> prepareCityBox() {
+        final ComboBox<String> comboBox = new ComboBox<>(CITY);
+        comboBox.setItems(Arrays.asList(WARSAW.getName(), BIALYSTOK.getName(), POZNAN.getName(), WROCLAW.getName()));
+
+        comboBox.addValueChangeListener(e -> {
+            final LandService landService = new LandService();
+            land.setCity(e.getValue());
+            CityPrice cityPrice = new CityPrice();
+            land.setCityMultiplier(landService.suggestCityPrice(land, cityPrice).getMultiplier());
+            paragraph.setText(this.calculatePrice(land).toString());
+        });
+
+        return comboBox;
+    }
+
+    private IntegerField prepareSizeField() {
+        final IntegerField sizeField = new IntegerField();
+        sizeField.setStepButtonsVisible(true);
+        sizeField.setMin(1);
+        sizeField.setLabel(SIZE_IN_M2);
+
+        sizeField.addValueChangeListener(e -> {
+            final LandService landService = new LandService();
+            land.setSize(e.getValue().longValue());
+            SizePrice sizePrice = new SizePrice();
+            land.setSizePrice(landService.suggestSizePrice(land, sizePrice).getPrice());
+            paragraph.setText(this.calculatePrice(land).toString());
+        });
+
+        return sizeField;
+    }
+
+    private Land prepareLand() {
+        final Land land = new Land();
+        land.setSizePrice(0.0);
+        land.setCityMultiplier(1);
+        land.setMediaPrice(0.0);
+        land.setShapeMultiplier(1.0);
+        land.setSurroundingsPrice(0.0);
+        land.setTypePrice(0.0);
+        return land;
+    }
+
+    private Section prepareFormDetails() {
+        final Section formDetails = new Section();
+        formDetails.addClassNames(Display.FLEX, FlexDirection.COLUMN, Margin.Bottom.XLARGE, Margin.Top.MEDIUM);
+        return formDetails;
+    }
+
+    private H3 prepareSiteHeader() {
+        final H3 header = new H3(LAND_DETAILS);
+        header.addClassNames(Margin.Bottom.MEDIUM, Margin.Top.SMALL, FontSize.XXLARGE);
+        return header;
+    }
+
+    private static HorizontalLayout preparePriceHeader(Paragraph paragraph) {
+        final H2 price = new H2(PRICE);
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.add(price);
         horizontalLayout.add(paragraph);
-        horizontalLayout.getStyle().set("padding-top", "30px");
-
-        RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
-        radioGroup.setLabel("Rodzaj");
-        radioGroup.setItems("Rolna", "Budowlana", "Lesna", "Rekreacyjna", "Inwestycyjna", "Siedliskowa");
-        radioGroup.setValue("Budowlana");
-        radioGroup.addValueChangeListener(e -> {
-            LandService landService = new LandService();
-            land.setType(e.getValue());
-            TypePrice typePrice = new TypePrice();
-            paragraph.setText(landService.suggestTypePrice(land, typePrice).getPrice().toString());
-        });
-
-        RadioButtonGroup<String> shapeRadioGroup = new RadioButtonGroup<>();
-        shapeRadioGroup.setLabel("Kształt działki");
-        shapeRadioGroup.setItems("Regularny", "Nieregularny");
-        shapeRadioGroup.setValue("Budowlana");
-        shapeRadioGroup.addValueChangeListener(e -> {
-//            LandService landService = new LandService();
-//            land.setType(e.getValue());
-//            TypePrice typePrice = new TypePrice();
-//            paragraph.setText(landService.suggestTypePrice(land, typePrice).getPrice().toString());
-        });
-
-        IntegerField integerField = new IntegerField();
-        integerField.setValue(1);
-        integerField.setStepButtonsVisible(true);
-        integerField.setMin(1);
-        integerField.setLabel("Wielkość w m2");
-        integerField.addValueChangeListener(e -> {
-            LandService landService = new LandService();
-            land.setSize(e.getValue().longValue());
-            SizePrice sizePrice = new SizePrice();
-            paragraph.setText(landService.suggestSizePrice(land, sizePrice).getPrice().toString());
-        });
-
-        CheckboxGroup<String> surroundingsCheckboxGroup = new CheckboxGroup<>();
-        surroundingsCheckboxGroup.setLabel("Infrastruktura drogowa");
-        surroundingsCheckboxGroup.setItems("Droga ekspresowa w okolicy", "Autostrada w okolicy", "Dojazd drogą asfaltowa");
-        surroundingsCheckboxGroup.addValueChangeListener(e ->{
-//            LandService landService = new LandService();
-//            land.setMedia(new ArrayList<>(e.getValue()));
-//            MediaPrice mediaPrice = new MediaPrice();
-//            landService.suggestMediaPrice(land, mediaPrice);
-        });
-
-        personalDetails.add(header, comboBox, checkboxGroup, radioGroup, integerField, surroundingsCheckboxGroup, shapeRadioGroup, horizontalLayout);
-        return personalDetails;
+        horizontalLayout.addClassName(PRICE_HEADER);
+        return horizontalLayout;
     }
 
+    private Double calculatePrice(Land land){
+        final double sizePrice = land.getSizePrice() != null ? land.getSizePrice():0.0;
+        final int cityMultiplier = land.getCityMultiplier() != null ? land.getCityMultiplier():1;
+        final double mediaPrice = land.getMediaPrice() != null ? land.getMediaPrice():0.0;
+        final double typePrice = land.getTypePrice() != null ? land.getTypePrice():0.0;
+        final double surroundingsPrice = land.getSurroundingsPrice() != null ? land.getSurroundingsPrice():0.0;
+        final double shapeMultiplier = land.getShapeMultiplier() != null ? land.getShapeMultiplier():1.0;
+
+        return (sizePrice * cityMultiplier + mediaPrice + typePrice + surroundingsPrice) * shapeMultiplier ;
+    }
 }

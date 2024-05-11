@@ -1,17 +1,16 @@
 package com.example.demo.service;
 
+import com.example.demo.common.RulesEnum;
 import com.example.demo.config.DroolsBeanFactory;
 import com.example.demo.entity.Land;
-import com.example.demo.prices.MediaPrice;
-import com.example.demo.prices.SizePrice;
-import com.example.demo.prices.TypePrice;
-import org.kie.api.KieBase;
+import com.example.demo.prices.*;
 import org.kie.api.runtime.KieSession;
 
 public class LandService {
+    private KieSession kieSession;
 
     public TypePrice suggestTypePrice(Land land, TypePrice typePrice) {
-        KieSession kieSession = new DroolsBeanFactory().getKieSession();
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.TYPE);
         try {
             kieSession.insert(land);
             kieSession.setGlobal("typePrice", typePrice);
@@ -25,7 +24,7 @@ public class LandService {
     }
 
     public MediaPrice suggestMediaPrice(Land land, MediaPrice mediaPrice) {
-        KieSession kieSession = new DroolsBeanFactory().getKieSession();
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.MEDIA);
         try {
             kieSession.insert(land);
             kieSession.setGlobal("mediaPrice", mediaPrice);
@@ -38,8 +37,8 @@ public class LandService {
 
     }
 
-        public SizePrice suggestSizePrice(Land land, SizePrice sizePrice) {
-        KieSession kieSession = new DroolsBeanFactory().getKieSession();
+    public SizePrice suggestSizePrice(Land land, SizePrice sizePrice) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SIZE);
         try {
             kieSession.insert(land);
             kieSession.setGlobal("sizePrice", sizePrice);
@@ -49,5 +48,44 @@ public class LandService {
         }
         System.out.println(sizePrice.getPrice());
         return sizePrice;
+    }
+
+    public SurroundingsPrice suggestSurroundingsPrice(Land land, SurroundingsPrice surroundingsPrice) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SURROUNDINGS);
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("surroundingsPrice", surroundingsPrice);
+            kieSession.fireAllRules();
+        } finally {
+            kieSession.dispose();
+        }
+        System.out.println(surroundingsPrice.getPrice());
+        return surroundingsPrice;
+    }
+
+    public CityPrice suggestCityPrice(Land land, CityPrice cityPrice) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.CITY);
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("cityPrice", cityPrice);
+            kieSession.fireAllRules();
+        } finally {
+            kieSession.dispose();
+        }
+        System.out.println(cityPrice.getMultiplier());
+        return cityPrice;
+    }
+
+    public ShapePrice suggestShapePrice(Land land, ShapePrice shapePrice) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SHAPE);
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("shapePrice", shapePrice);
+            kieSession.fireAllRules();
+        } finally {
+            kieSession.dispose();
+        }
+        System.out.println(shapePrice.getShapeMultiplier());
+        return shapePrice;
     }
 }

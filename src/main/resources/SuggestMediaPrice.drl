@@ -1,89 +1,77 @@
 import com.example.demo.entity.Land;
+import com.example.demo.prices.TypePrice;
+import com.example.demo.prices.MediaPrice;
+import com.example.demo.prices.SizePrice;
+import com.example.demo.common.MediaEnum;
+
 global com.example.demo.prices.TypePrice typePrice;
 global com.example.demo.prices.MediaPrice mediaPrice;
 global com.example.demo.prices.SizePrice sizePrice;
-rule "Power rule"
+
+rule "Power price"
     when
-        Land(media contains "Prąd")
+        Land(media contains MediaEnum.POWER.getName())
     then
-        mediaPrice.setPrice(100.0);
+        mediaPrice.setPrice(1000.0);
 end
 
-rule "Water rule"
+rule "Water price"
     when
-        Land(media contains "Woda")
+        Land(media contains MediaEnum.WATER.getName())
     then
-        mediaPrice.setPrice(200.0);
+        mediaPrice.setPrice(2000.0);
 end
 
-rule "Gas rule"
+rule "Gas price"
     when
-        Land(media contains "Gaz")
+        Land(media contains MediaEnum.GAS.getName())
     then
-        mediaPrice.setPrice(300.0);
+        mediaPrice.setPrice(3000.0);
 end
 
-rule "Sewage rule"
+rule "Sewage price"
     when
-        Land(media contains "Kanalizacja")
+        Land(media contains MediaEnum.SEWER.getName())
     then
-        mediaPrice.setPrice(400.0);
+        mediaPrice.setPrice(4000.0);
 end
 
-rule "Power and Water rule"
+rule "Multiple Utilities price"
     when
-        Land(media contains "Prąd")
-        Land(media contains "Woda")
+        Land($media : media)
     then
-        mediaPrice.setPrice(350.0);
-end
 
-rule "Power and Gas rule"
-    when
-        Land(media contains "Prąd")
-        Land(media contains "Gaz")
-    then
-        mediaPrice.setPrice(400.0);
-end
-
-rule "Power and Sewage rule"
-    when
-        Land(media contains "Prąd")
-        Land(media contains "Kanalizacja")
-    then
-        mediaPrice.setPrice(450.0);
-end
-
-rule "Water and Gas rule"
-    when
-        Land(media contains "Woda")
-        Land(media contains "Gaz")
-    then
-        mediaPrice.setPrice(500.0);
-end
-
-rule "Water and Sewage rule"
-    when
-        Land(media contains "Woda")
-        Land(media contains "Kanalizacja")
-    then
-        mediaPrice.setPrice(550.0);
-end
-
-rule "Gas and Sewage rule"
-    when
-        Land(media contains "Gaz")
-        Land(media contains "Kanalizacja")
-    then
-        mediaPrice.setPrice(600.0);
-end
-
-rule "All Utilities rule"
-    when
-        Land(media contains "Prąd")
-        Land(media contains "Woda")
-        Land(media contains "Gaz")
-        Land(media contains "Kanalizacja")
-    then
-        mediaPrice.setPrice(1350.0);
+        if ($media.contains(MediaEnum.POWER.getName()) && $media.contains(MediaEnum.WATER.getName())) {
+            mediaPrice.setPrice(3000.0);
+        }
+        if ($media.contains(MediaEnum.POWER.getName()) && $media.contains(MediaEnum.GAS.getName())) {
+            mediaPrice.setPrice(4000.0);
+        }
+        if ($media.contains(MediaEnum.POWER.getName()) && $media.contains(MediaEnum.SEWER.getName())) {
+            mediaPrice.setPrice(5000.0);
+        }
+        if ($media.contains(MediaEnum.WATER.getName()) && $media.contains(MediaEnum.GAS.getName())) {
+            mediaPrice.setPrice(5000.0);
+        }
+        if ($media.contains(MediaEnum.WATER.getName()) && $media.contains(MediaEnum.SEWER.getName())) {
+            mediaPrice.setPrice(6000.0);
+        }
+        if ($media.contains(MediaEnum.GAS.getName()) && $media.contains(MediaEnum.SEWER.getName())) {
+            mediaPrice.setPrice(7000.0);
+        }
+        if ($media.contains(MediaEnum.POWER.getName()) && $media.contains(MediaEnum.WATER.getName())
+            && $media.contains(MediaEnum.GAS.getName())) {
+                    mediaPrice.setPrice(6000.0);
+        }
+        if ($media.contains(MediaEnum.POWER.getName()) && $media.contains(MediaEnum.WATER.getName())
+            && $media.contains(MediaEnum.SEWER.getName())) {
+                    mediaPrice.setPrice(7000.0);
+        }
+        if ($media.contains(MediaEnum.GAS.getName()) && $media.contains(MediaEnum.WATER.getName()) && $media.contains(MediaEnum.SEWER.getName())) {
+                    mediaPrice.setPrice(9000.0);
+        }
+        if ($media.contains(MediaEnum.POWER.getName()) && $media.contains(MediaEnum.WATER.getName())
+            && $media.contains(MediaEnum.GAS.getName()) && $media.contains(MediaEnum.SEWER.getName())) {
+            mediaPrice.setPrice(10000.0);
+        }
 end

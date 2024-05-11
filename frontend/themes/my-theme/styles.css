@@ -16,4 +16,6 @@ vaadin-text-field.bordered::part(input-field) {
   background-color: var(--lumo-base-color);
 }
 
-
+.price-header{
+  padding-top: 30px;
+}

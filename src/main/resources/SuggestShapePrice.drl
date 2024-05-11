@@ -1,0 +1,17 @@
+import com.example.demo.entity.Land;
+
+global com.example.demo.prices.ShapePrice shapePrice;
+
+rule "Regular price"
+    when
+        Land(regular == true)
+    then
+    shapePrice.setShapeMultiplier(1.2);
+end
+
+rule "Irregular price"
+    when
+        Land(regular == false)
+    then
+    shapePrice.setShapeMultiplier(0.8);
+end

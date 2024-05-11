@@ -1,7 +1,7 @@
 package com.example.demo.prices;
 
 public class SizePrice {
-    Double price;
+    private Double price;
 
     public Double getPrice() {
         return price;

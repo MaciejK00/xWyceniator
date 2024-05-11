@@ -1,9 +1,7 @@
 package com.example.demo.prices;
 
-
 public class TypePrice {
-
-    Double price;
+    private Double price;
 
     public Double getPrice() {
         return price;

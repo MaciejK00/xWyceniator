@@ -1,9 +1,7 @@
 import com.example.demo.entity.Land;
-global com.example.demo.prices.TypePrice typePrice;
-global com.example.demo.prices.MediaPrice mediaPrice;
 global com.example.demo.prices.SizePrice sizePrice;
 
-rule "Cena za metr"
+rule "Square Meter price"
 when
     $land : Land(size > 0)
 then
