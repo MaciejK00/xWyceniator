@@ -40,7 +40,7 @@ rule "Multiple Surroundings price"
         }
         if (surroundings.contains(SurroundingsEnum.HIGHWAY.getName())
             && surroundings.contains(SurroundingsEnum.TARMAC.getName())
-            && surroundings.contains(SurroundingsEnum.TARMAC.getName())) {
+            && surroundings.contains(SurroundingsEnum.EXPRESS.getName())) {
             surroundingsPrice.setPrice(35000.0);
         }
 end

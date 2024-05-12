@@ -1,38 +1,40 @@
 package com.example.demo.view;
 
+import com.example.demo.common.MediaEnum;
+import com.example.demo.common.SurroundingsEnum;
 import com.example.demo.entity.Land;
 import com.example.demo.prices.*;
 import com.example.demo.service.LandService;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.Flex;
-import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import com.vaadin.flow.theme.lumo.LumoUtility.Height;
-import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import com.vaadin.flow.theme.lumo.LumoUtility.MaxWidth;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import com.vaadin.flow.theme.lumo.LumoUtility.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
+import static com.example.demo.common.CityEnum.*;
 import static com.example.demo.common.Dictionary.*;
 import static com.example.demo.common.MediaEnum.*;
-import static com.example.demo.common.CityEnum.*;
+import static com.example.demo.common.ShapeEnum.IRREGULAR;
+import static com.example.demo.common.ShapeEnum.REGULAR;
 import static com.example.demo.common.SurroundingsEnum.*;
-import static com.example.demo.common.ShapeEnum.*;
 import static com.example.demo.common.TypeEnum.*;
 
 @PageTitle("Wyceniator")
@@ -40,6 +42,7 @@ import static com.example.demo.common.TypeEnum.*;
 public class CheckoutFormView extends Div {
     private Land land;
     private Paragraph paragraph;
+    private Button summaryButton;
 
     public CheckoutFormView() {
         this.addClassNames(Display.FLEX, FlexDirection.COLUMN, Height.FULL);
@@ -82,7 +85,7 @@ public class CheckoutFormView extends Div {
         final CheckboxGroup<String> surroundingsCheckboxGroup = this.prepareShapeCheckboxGroup();
         final RadioButtonGroup<String> shapeRadioGroup = this.prepareShapeRadioGroup();
 
-        final HorizontalLayout horizontalLayout = preparePriceHeader(paragraph);
+        final HorizontalLayout horizontalLayout = this.preparePriceHeader(paragraph);
 
         formDetails.add(header, sizeField, cityBox, mediaCheckboxGroup, typeRadioGroup, surroundingsCheckboxGroup, shapeRadioGroup, horizontalLayout);
         return formDetails;
@@ -99,6 +102,7 @@ public class CheckoutFormView extends Div {
             SurroundingsPrice surroundingsPrice = new SurroundingsPrice();
             land.setSurroundingsPrice(landService.suggestSurroundingsPrice(land, surroundingsPrice).getPrice());
             paragraph.setText(this.calculatePrice(land).toString());
+            this.validateSummaryButton();
         });
 
         return surroundingsCheckboxGroup;
@@ -115,6 +119,7 @@ public class CheckoutFormView extends Div {
             ShapePrice shapePrice = new ShapePrice();
             land.setShapeMultiplier(landService.suggestShapePrice(land, shapePrice).getShapeMultiplier());
             paragraph.setText(this.calculatePrice(land).toString());
+            this.validateSummaryButton();
         });
 
         return shapeRadioGroup;
@@ -132,6 +137,7 @@ public class CheckoutFormView extends Div {
             TypePrice typePrice = new TypePrice();
             land.setTypePrice(landService.suggestTypePrice(land, typePrice).getPrice());
             paragraph.setText(this.calculatePrice(land).toString());
+            this.validateSummaryButton();
         });
 
         return radioGroup;
@@ -148,6 +154,7 @@ public class CheckoutFormView extends Div {
             MediaPrice mediaPrice = new MediaPrice();
             land.setMediaPrice(landService.suggestMediaPrice(land, mediaPrice).getPrice());
             paragraph.setText(this.calculatePrice(land).toString());
+            this.validateSummaryButton();
         });
 
         return mediaCheckBox;
@@ -163,6 +170,7 @@ public class CheckoutFormView extends Div {
             CityPrice cityPrice = new CityPrice();
             land.setCityMultiplier(landService.suggestCityPrice(land, cityPrice).getMultiplier());
             paragraph.setText(this.calculatePrice(land).toString());
+            this.validateSummaryButton();
         });
 
         return comboBox;
@@ -180,6 +188,7 @@ public class CheckoutFormView extends Div {
             SizePrice sizePrice = new SizePrice();
             land.setSizePrice(landService.suggestSizePrice(land, sizePrice).getPrice());
             paragraph.setText(this.calculatePrice(land).toString());
+            this.validateSummaryButton();
         });
 
         return sizeField;
@@ -193,6 +202,13 @@ public class CheckoutFormView extends Div {
         land.setShapeMultiplier(1.0);
         land.setSurroundingsPrice(0.0);
         land.setTypePrice(0.0);
+        land.setGasPrice(3000.0);
+        land.setPowerPrice(1000.0);
+        land.setSewerPrice(4000.0);
+        land.setWaterPrice(2000.0);
+        land.setExpressPrice(10000.0);
+        land.setHighwayPrice(20000.0);
+        land.setTarmacPrice(5000.0);
         return land;
     }
 
@@ -208,23 +224,181 @@ public class CheckoutFormView extends Div {
         return header;
     }
 
-    private static HorizontalLayout preparePriceHeader(Paragraph paragraph) {
+    private HorizontalLayout preparePriceHeader(Paragraph paragraph) {
         final H2 price = new H2(PRICE);
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.add(price);
         horizontalLayout.add(paragraph);
         horizontalLayout.addClassName(PRICE_HEADER);
+        final Button summaryButton = this.prepareSummaryButton();
+        horizontalLayout.add(summaryButton);
+
         return horizontalLayout;
     }
 
-    private Double calculatePrice(Land land){
-        final double sizePrice = land.getSizePrice() != null ? land.getSizePrice():0.0;
-        final int cityMultiplier = land.getCityMultiplier() != null ? land.getCityMultiplier():1;
-        final double mediaPrice = land.getMediaPrice() != null ? land.getMediaPrice():0.0;
-        final double typePrice = land.getTypePrice() != null ? land.getTypePrice():0.0;
-        final double surroundingsPrice = land.getSurroundingsPrice() != null ? land.getSurroundingsPrice():0.0;
-        final double shapeMultiplier = land.getShapeMultiplier() != null ? land.getShapeMultiplier():1.0;
+    private Button prepareSummaryButton() {
+        this.summaryButton = new Button(SUMMARY);
+        this.summaryButton.setEnabled(false);
+        this.summaryButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        this.summaryButton.addClickListener(e -> {
+            final Dialog summaryPopup = this.prepareSummaryPopup();
+            summaryPopup.open();
+        });
+        return this.summaryButton;
+    }
 
-        return (sizePrice * cityMultiplier + mediaPrice + typePrice + surroundingsPrice) * shapeMultiplier ;
+    private Dialog prepareSummaryPopup() {
+        final Dialog summaryPopup = new Dialog();
+        summaryPopup.setHeaderTitle(PRICE_SUMMARY);
+
+        final VerticalLayout dialogLayout = createDialogLayout();
+        summaryPopup.add(dialogLayout);
+
+        final Button cancelButton = this.prepareCloseButton(summaryPopup);
+        summaryPopup.getFooter().add(cancelButton);
+        return summaryPopup;
+    }
+
+    private Button prepareCloseButton(Dialog summaryPopup) {
+        Button cancelButton = new Button(EXIT);
+        cancelButton.addClickListener(e -> summaryPopup.close());
+        return cancelButton;
+    }
+
+    private VerticalLayout createDialogLayout() {
+        final HorizontalLayout pricePerMeterHorizontalLayout = new HorizontalLayout();
+        final H3 pricePerMeterHeader = new H3(PRICE_PER_METER);
+        final double pricePerMeter = (this.land.getSizePrice() / this.land.getSize()) * this.land.getCityMultiplier();
+        final Paragraph price = new Paragraph(Double.toString(pricePerMeter));
+        pricePerMeterHorizontalLayout.add(pricePerMeterHeader, price);
+
+        final H3 mediaHeader = new H3(MEDIA);
+        final H3 typeHeader = new H3(TYPE);
+        final H3 infrastructureHeader = new H3(INFRASTRUCTURE);
+        final H3 shapeHeader = new H3(LAND_SHAPE);
+
+        final VerticalLayout mediaVerticalLayout = new VerticalLayout();
+        this.prepareMediaSummary(mediaVerticalLayout);
+
+        final VerticalLayout typeVerticalLayout = this.prepareTypeLayout();
+        final VerticalLayout shapeVerticalLayout = this.prepareShapeLayout();
+
+        final VerticalLayout infrastructureVerticalLayout = new VerticalLayout();
+        this.prepareInfrastructureSummary(infrastructureVerticalLayout);
+
+        final VerticalLayout dialogLayout = new VerticalLayout(pricePerMeterHorizontalLayout, mediaHeader, mediaVerticalLayout,
+                typeHeader, typeVerticalLayout, infrastructureHeader, infrastructureVerticalLayout, shapeHeader, shapeVerticalLayout);
+        dialogLayout.setPadding(false);
+        dialogLayout.setSpacing(false);
+        dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+        dialogLayout.addClassName(DIALOG_LAYOUT);
+
+        return dialogLayout;
+    }
+
+    private void prepareInfrastructureSummary(VerticalLayout infrastructureVerticalLayout) {
+        final SurroundingsEnum[] surroundingsList = SurroundingsEnum.values();
+        final Map<SurroundingsEnum, Icon> infrastructureMap = new HashMap<>();
+        for (SurroundingsEnum surroundingsEnum : surroundingsList) {
+            final Icon check = VaadinIcon.CHECK.create();
+            check.addClassName(CHECK);
+            check.setColor(GREEN);
+
+            final Icon close = VaadinIcon.CLOSE.create();
+            close.addClassName(CLOSE);
+            close.setColor(RED);
+
+            infrastructureMap.put(surroundingsEnum, land.getSurroundings().contains(surroundingsEnum.getName()) ? check : close);
+        }
+
+        infrastructureMap.forEach((k, v) -> {
+            final HorizontalLayout horizontalLayout = new HorizontalLayout();
+            final Text infrastrucutreText = new Text(k.getName());
+            Double infrastructurePrice = 0.0;
+            if (v.getClassNames().contains(CHECK)) {
+                switch (k) {
+                    case EXPRESS -> infrastructurePrice = land.getExpressPrice();
+                    case HIGHWAY -> infrastructurePrice = land.getHighwayPrice();
+                    case TARMAC -> infrastructurePrice = land.getTarmacPrice();
+                }
+
+            }
+            final Text priceText = new Text(" " + infrastructurePrice.toString());
+            horizontalLayout.add(v, infrastrucutreText, priceText);
+            infrastructureVerticalLayout.add(horizontalLayout);
+
+        });
+    }
+
+    private VerticalLayout prepareTypeLayout() {
+        final VerticalLayout typeVerticalLayout = new VerticalLayout();
+        final Icon check = VaadinIcon.CHECK.create();
+        check.setColor(GREEN);
+        final HorizontalLayout typeHorizontalLayout = new HorizontalLayout(check, new Text(land.getType() + " " + land.getTypePrice()));
+        typeVerticalLayout.add(typeHorizontalLayout);
+        return typeVerticalLayout;
+    }
+
+    private VerticalLayout prepareShapeLayout() {
+        final VerticalLayout shapeVerticalLayout = new VerticalLayout();
+        final Icon check = land.isRegular() ? VaadinIcon.CHECK.create() : VaadinIcon.CLOSE.create();
+        check.setColor(land.isRegular() ? GREEN : RED);
+
+        String text = land.isRegular() ? REGULAR.getName() : IRREGULAR.getName();
+
+        final HorizontalLayout typeHorizontalLayout = new HorizontalLayout(check, new Text(text + " x" + land.getShapeMultiplier()));
+        shapeVerticalLayout.add(typeHorizontalLayout);
+        return shapeVerticalLayout;
+    }
+
+    private void prepareMediaSummary(VerticalLayout mediaHorizontalLayout) {
+        final MediaEnum[] mediaList = MediaEnum.values();
+        final Map<MediaEnum, Icon> mediaMap = new HashMap<>();
+        for (MediaEnum mediaEnum : mediaList) {
+            final Icon check = VaadinIcon.CHECK.create();
+            check.addClassName(CHECK);
+            check.setColor(GREEN);
+
+            final Icon close = VaadinIcon.CLOSE.create();
+            close.addClassName(CLOSE);
+            close.setColor(RED);
+
+            mediaMap.put(mediaEnum, land.getMedia().contains(mediaEnum.getName()) ?
+                    check : close);
+        }
+
+        mediaMap.forEach((k, v) -> {
+            final HorizontalLayout horizontalLayout = new HorizontalLayout();
+            final Text mediaText = new Text(k.getName());
+            Double mediaPrice = 0.0;
+            if (v.getClassNames().contains(CHECK)) {
+                switch (k) {
+                    case POWER -> mediaPrice = land.getPowerPrice();
+                    case WATER -> mediaPrice = land.getWaterPrice();
+                    case GAS -> mediaPrice = land.getGasPrice();
+                    case SEWER -> mediaPrice = land.getSewerPrice();
+                }
+            }
+
+            final Text priceText = new Text(" " + mediaPrice.toString());
+            horizontalLayout.add(v, mediaText, priceText);
+            mediaHorizontalLayout.add(horizontalLayout);
+        });
+    }
+
+    private Double calculatePrice(Land land) {
+        final double sizePrice = land.getSizePrice() != null ? land.getSizePrice() : 0.0;
+        final int cityMultiplier = land.getCityMultiplier() != null ? land.getCityMultiplier() : 1;
+        final double mediaPrice = land.getMediaPrice() != null ? land.getMediaPrice() : 0.0;
+        final double typePrice = land.getTypePrice() != null ? land.getTypePrice() : 0.0;
+        final double surroundingsPrice = land.getSurroundingsPrice() != null ? land.getSurroundingsPrice() : 0.0;
+        final double shapeMultiplier = land.getShapeMultiplier() != null ? land.getShapeMultiplier() : 1.0;
+
+        return (sizePrice * cityMultiplier + mediaPrice + typePrice + surroundingsPrice) * shapeMultiplier;
+    }
+
+    private void validateSummaryButton(){
+        this.summaryButton.setEnabled(this.land.getSize() != null && this.land.getType() != null
+                && this.land.getShapeMultiplier() != 1.0 && this.land.getCity() != null);
     }
 }
