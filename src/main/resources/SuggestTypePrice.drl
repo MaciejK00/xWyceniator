@@ -1,23 +1,20 @@
 import com.example.demo.entity.Land;
 import com.example.demo.prices.TypePrice;
 import com.example.demo.common.TypeEnum;
+import com.example.demo.common.LandTypePrice;
 
 global com.example.demo.prices.TypePrice typePrice;
-
-declare LandTypePrice
-    type : String
-    price : Double
-end
 
 rule "Init data"
     when
     then
-        insert(new LandTypePrice(TypeEnum.AGRICULTURAL.getName(), 10000.0));
-        insert(new LandTypePrice(TypeEnum.BUILDING.getName(), 15000.0));
-        insert(new LandTypePrice(TypeEnum.HABITAT.getName(), 1000.0));
-        insert(new LandTypePrice(TypeEnum.INVESTMENT.getName(), 20000.0));
-        insert(new LandTypePrice(TypeEnum.FOREST.getName(), 2000.0));
-        insert(new LandTypePrice(TypeEnum.LEISURE.getName(), 3500.0));
+        insert(new LandTypePrice("Rolna", 10000.0));
+        insert(new LandTypePrice("Budowlana", 15000.0));
+        insert(new LandTypePrice("Lesna", 1000.0));
+        insert(new LandTypePrice("Rekreacyjna", 20000.0));
+        insert(new LandTypePrice("Inwestycyjna", 2000.0));
+        insert(new LandTypePrice("Siedliskowa", 3500.0));
+        insert(new LandTypePrice("super", 3000.0));
 end
 
 rule "Type price"

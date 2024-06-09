@@ -1,6 +1,7 @@
 package com.example.demo.view;
 
 import com.example.demo.common.CityMultiplier;
+import com.example.demo.common.LandTypePrice;
 import com.example.demo.common.MediaEnum;
 import com.example.demo.common.SurroundingsEnum;
 import com.example.demo.entity.Land;
@@ -95,7 +96,9 @@ public class CheckoutFormView extends Div {
     private CheckboxGroup<String> prepareShapeCheckboxGroup() {
         final CheckboxGroup<String> surroundingsCheckboxGroup = new CheckboxGroup<>();
         surroundingsCheckboxGroup.setLabel(INFRASTRUCTURE);
-        surroundingsCheckboxGroup.setItems(EXPRESS.getName(), HIGHWAY.getName(), TARMAC.getName());
+        LandService landService2 = new LandService();
+        SurroundingsPrice surroundingsPrice2 = new SurroundingsPrice();
+        surroundingsCheckboxGroup.setItems(landService2.getSurroundings(land, surroundingsPrice2).stream().map(obj -> obj.getSurroundingsList().get(0)).toArray(String[]::new));
 
         surroundingsCheckboxGroup.addValueChangeListener(e -> {
             final LandService landService = new LandService();
@@ -129,8 +132,10 @@ public class CheckoutFormView extends Div {
     private RadioButtonGroup<String> prepareTypeRadioGroup() {
         final RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
         radioGroup.setLabel(TYPE);
-        radioGroup.setItems(AGRICULTURAL.getName(), BUILDING.getName(), FOREST.getName(), LEISURE.getName(),
-                INVESTMENT.getName(), HABITAT.getName());
+        LandService landService2 = new LandService();
+        TypePrice typePrice2 = new TypePrice();
+
+        radioGroup.setItems(landService2.getTypes(land, typePrice2).stream().map(LandTypePrice::getType).toArray(String[]::new));
 
         radioGroup.addValueChangeListener(e -> {
             final LandService landService = new LandService();
@@ -147,7 +152,10 @@ public class CheckoutFormView extends Div {
     private CheckboxGroup<String> prepareMediaCheckboxGroup() {
         final CheckboxGroup<String> mediaCheckBox = new CheckboxGroup<>();
         mediaCheckBox.setLabel(MEDIA);
-        mediaCheckBox.setItems(POWER.getName(), GAS.getName(), WATER.getName(), SEWER.getName());
+        LandService landService2 = new LandService();
+        MediaPrice mediaPrice2 = new MediaPrice();
+
+        mediaCheckBox.setItems(landService2.getmedia(land, mediaPrice2).stream().map(obj -> obj.getMediaList().get(0)).toArray(String[]::new));
 
         mediaCheckBox.addValueChangeListener(e -> {
             final LandService landService = new LandService();
@@ -399,7 +407,7 @@ public class CheckoutFormView extends Div {
         return (sizePrice * cityMultiplier + mediaPrice + typePrice + surroundingsPrice) * shapeMultiplier;
     }
 
-    private void validateSummaryButton(){
+    private void validateSummaryButton() {
         this.summaryButton.setEnabled(this.land.getSize() != null && this.land.getType() != null
                 && this.land.getShapeMultiplier() != 1.0 && this.land.getCity() != null);
     }

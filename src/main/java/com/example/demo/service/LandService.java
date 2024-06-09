@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.common.CityMultiplier;
-import com.example.demo.common.RulesEnum;
+import com.example.demo.common.*;
 import com.example.demo.config.DroolsBeanFactory;
 import com.example.demo.entity.Land;
 import com.example.demo.prices.*;
@@ -27,6 +26,30 @@ public class LandService {
 
     }
 
+    public List<LandTypePrice> getTypes(Land land, TypePrice typePrice) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.TYPE);
+        List<LandTypePrice> typePrices = new ArrayList<>();
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("typePrice", typePrice);
+            kieSession.fireAllRules();
+
+            List<Object> objects = new ArrayList<>(kieSession.getObjects());
+
+            for (Object media : objects) {
+                if (media instanceof LandTypePrice landTypePrice) {
+                    typePrices.add(landTypePrice);
+                }
+
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+        return typePrices;
+
+    }
+
     public MediaPrice suggestMediaPrice(Land land, MediaPrice mediaPrice) {
         kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.MEDIA);
         try {
@@ -38,6 +61,32 @@ public class LandService {
         }
         System.out.println(mediaPrice.getPrice());
         return mediaPrice;
+
+    }
+
+
+    public List<MediaPriceFact> getmedia(Land land, MediaPrice mediaPrice) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.MEDIA);
+        List<MediaPriceFact> mediaPriceFacts = new ArrayList<>();
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("mediaPrice", mediaPrice);
+            kieSession.fireAllRules();
+
+            List<Object> objects = new ArrayList<>(kieSession.getObjects());
+
+            for (Object media : objects) {
+                if (media instanceof MediaPriceFact mediaPriceFact) {
+                    mediaPriceFacts.add(mediaPriceFact);
+                }
+
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+
+        return mediaPriceFacts;
 
     }
 
@@ -66,6 +115,32 @@ public class LandService {
         System.out.println(surroundingsPrice.getPrice());
         return surroundingsPrice;
     }
+
+
+    public List<SurroundingsPriceFact> getSurroundings(Land land, SurroundingsPrice surroundingsPrice) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SURROUNDINGS);
+        List<SurroundingsPriceFact> surroundingsPriceFacts = new ArrayList<>();
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("surroundingsPrice", surroundingsPrice);
+            kieSession.fireAllRules();
+
+            List<Object> objects = new ArrayList<>(kieSession.getObjects());
+
+            for (Object object : objects) {
+                if (object instanceof SurroundingsPriceFact surroundingsPriceFact) {
+                    surroundingsPriceFacts.add(surroundingsPriceFact);
+                }
+
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+        System.out.println(surroundingsPrice.getPrice());
+        return surroundingsPriceFacts;
+    }
+
 
     public CityPrice suggestCityPrice(Land land, CityPrice cityPrice) {
         kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.CITY);
