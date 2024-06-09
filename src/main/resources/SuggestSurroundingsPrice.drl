@@ -1,46 +1,35 @@
 import com.example.demo.entity.Land;
 import com.example.demo.common.SurroundingsEnum;
+import java.util.List;
+import java.util.Arrays;
+import java.util.List;
 
 global com.example.demo.prices.SurroundingsPrice surroundingsPrice;
 
-rule "Express price"
-    when
-        Land(surroundings contains SurroundingsEnum.EXPRESS.getName())
-    then
-    surroundingsPrice.setPrice(10000.0);
+declare SurroundingsPriceFact
+    surroundingsList : List
+    price : double
 end
 
-rule "Highway price"
+rule "Define Surroundings Prices"
+    no-loop
     when
-        Land(surroundings contains SurroundingsEnum.HIGHWAY.getName())
+        not SurroundingsPriceFact()
     then
-    surroundingsPrice.setPrice(20000.0);
+        insert(new SurroundingsPriceFact(Arrays.asList(SurroundingsEnum.EXPRESS.getName()), 10000.0));
+        insert(new SurroundingsPriceFact(Arrays.asList(SurroundingsEnum.HIGHWAY.getName()), 20000.0));
+        insert(new SurroundingsPriceFact(Arrays.asList(SurroundingsEnum.TARMAC.getName()), 5000.0));
+        insert(new SurroundingsPriceFact(Arrays.asList(SurroundingsEnum.EXPRESS.getName(), SurroundingsEnum.HIGHWAY.getName()), 30000.0));
+        insert(new SurroundingsPriceFact(Arrays.asList(SurroundingsEnum.EXPRESS.getName(), SurroundingsEnum.TARMAC.getName()), 15000.0));
+        insert(new SurroundingsPriceFact(Arrays.asList(SurroundingsEnum.HIGHWAY.getName(), SurroundingsEnum.TARMAC.getName()), 25000.0));
+        insert(new SurroundingsPriceFact(Arrays.asList(SurroundingsEnum.EXPRESS.getName(), SurroundingsEnum.HIGHWAY.getName(), SurroundingsEnum.TARMAC.getName()), 35000.0));
 end
 
-rule "Tarmac price"
+rule "Set Surroundings Price"
     when
-        Land(surroundings contains SurroundingsEnum.TARMAC.getName())
+        $land : Land($surroundings : surroundings)
+        $priceFact : SurroundingsPriceFact($surroundingsList : surroundingsList)
+        eval($surroundings.containsAll($surroundingsList) && $surroundingsList.containsAll($surroundings))
     then
-    surroundingsPrice.setPrice(5000.0);
-end
-
-rule "Multiple Surroundings price"
-    when
-        Land(surroundings : surroundings)
-    then
-
-        if (surroundings.contains(SurroundingsEnum.EXPRESS.getName()) && surroundings.contains(SurroundingsEnum.HIGHWAY.getName())) {
-            surroundingsPrice.setPrice(30000.0);
-        }
-        if (surroundings.contains(SurroundingsEnum.EXPRESS.getName()) && surroundings.contains(SurroundingsEnum.TARMAC.getName())) {
-            surroundingsPrice.setPrice(15000.0);
-        }
-        if (surroundings.contains(SurroundingsEnum.HIGHWAY.getName()) && surroundings.contains(SurroundingsEnum.TARMAC.getName())) {
-            surroundingsPrice.setPrice(25000.0);
-        }
-        if (surroundings.contains(SurroundingsEnum.HIGHWAY.getName())
-            && surroundings.contains(SurroundingsEnum.TARMAC.getName())
-            && surroundings.contains(SurroundingsEnum.EXPRESS.getName())) {
-            surroundingsPrice.setPrice(35000.0);
-        }
+        surroundingsPrice.setPrice($priceFact.getPrice());
 end

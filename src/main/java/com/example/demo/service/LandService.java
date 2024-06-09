@@ -1,10 +1,14 @@
 package com.example.demo.service;
 
+import com.example.demo.common.CityMultiplier;
 import com.example.demo.common.RulesEnum;
 import com.example.demo.config.DroolsBeanFactory;
 import com.example.demo.entity.Land;
 import com.example.demo.prices.*;
 import org.kie.api.runtime.KieSession;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LandService {
     private KieSession kieSession;
@@ -75,6 +79,31 @@ public class LandService {
         System.out.println(cityPrice.getMultiplier());
         return cityPrice;
     }
+
+
+    public List<CityMultiplier> getCities(Land land) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.CITY);
+        List<CityMultiplier> cities = new ArrayList<>();
+        try {
+            kieSession.insert(land);
+            kieSession.fireAllRules();
+
+            List<Object> cityMultipliers = new ArrayList<>(kieSession.getObjects());
+
+            for (Object cityMultiplier : cityMultipliers) {
+                if (cityMultiplier instanceof CityMultiplier multiplier) {
+                    cities.add(multiplier);
+                }
+
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+
+        return cities;
+    }
+
 
     public ShapePrice suggestShapePrice(Land land, ShapePrice shapePrice) {
         kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SHAPE);

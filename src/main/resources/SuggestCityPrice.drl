@@ -1,32 +1,26 @@
 import com.example.demo.entity.Land;
 import com.example.demo.common.CityEnum;
+import com.example.demo.prices.CityPrice;
+import com.example.demo.common.CityMultiplier
 
 global com.example.demo.prices.CityPrice cityPrice;
 
-rule "Bialystok price"
+
+rule "Define City Multipliers"
+    no-loop
     when
-        Land(city == CityEnum.BIALYSTOK.getName())
+        not CityMultiplier()
     then
-    cityPrice.setMultiplier(2);
+        insert(new CityMultiplier("Bialystok", 2));
+        insert(new CityMultiplier("Warszawa", 4));
+        insert(new CityMultiplier("Poznan", 3));
+        insert(new CityMultiplier("Wroclaw", 3));
 end
 
-rule "Warszawa price"
+rule "Set City Price Multiplier"
     when
-        Land(city == CityEnum.WARSAW.getName())
+        $land : Land($city : city)
+        $multiplier : CityMultiplier(city == $city)
     then
-    cityPrice.setMultiplier(4);
-end
-
-rule "Poznan price"
-    when
-        Land(city == CityEnum.POZNAN.getName())
-    then
-    cityPrice.setMultiplier(3);
-end
-
-rule "Wroclaw price"
-    when
-        Land(city == CityEnum.WROCLAW.getName())
-    then
-    cityPrice.setMultiplier(3);
+        cityPrice.setMultiplier($multiplier.getMultiplier());
 end

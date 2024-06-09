@@ -1,17 +1,28 @@
 import com.example.demo.entity.Land;
+import com.example.demo.prices.ShapePrice;
 
 global com.example.demo.prices.ShapePrice shapePrice;
 
-rule "Regular price"
-    when
-        Land(regular == true)
-    then
-    shapePrice.setShapeMultiplier(1.2);
+declare ShapePriceFact
+    regular : boolean
+    multiplier : double
 end
 
-rule "Irregular price"
+
+rule "Define Shape Prices"
+    no-loop
     when
-        Land(regular == false)
+        not ShapePriceFact()
     then
-    shapePrice.setShapeMultiplier(0.8);
+        insert(new ShapePriceFact(true, 1.2));
+        insert(new ShapePriceFact(false, 0.8));
+end
+
+
+rule "Set Shape Price"
+    when
+        $land : Land($regular : regular)
+        $priceFact : ShapePriceFact(regular == $regular, $multiplier : multiplier)
+    then
+        shapePrice.setShapeMultiplier($multiplier);
 end

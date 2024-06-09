@@ -1,5 +1,6 @@
 package com.example.demo.view;
 
+import com.example.demo.common.CityMultiplier;
 import com.example.demo.common.MediaEnum;
 import com.example.demo.common.SurroundingsEnum;
 import com.example.demo.entity.Land;
@@ -162,7 +163,8 @@ public class CheckoutFormView extends Div {
 
     private ComboBox<String> prepareCityBox() {
         final ComboBox<String> comboBox = new ComboBox<>(CITY);
-        comboBox.setItems(Arrays.asList(WARSAW.getName(), BIALYSTOK.getName(), POZNAN.getName(), WROCLAW.getName()));
+        LandService landService2 = new LandService();
+        comboBox.setItems(landService2.getCities(land).stream().map(CityMultiplier::getCity).toList());
 
         comboBox.addValueChangeListener(e -> {
             final LandService landService = new LandService();
