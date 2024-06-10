@@ -21,6 +21,8 @@ rule "Define Media Prices"
         insert(new MediaPriceFact(Arrays.asList("Gaz"), 3000.0));
         insert(new MediaPriceFact(Arrays.asList("Kanalizacja"), 4000.0));
         insert(new MediaPriceFact(Arrays.asList("Test"), 5000.0));
+        insert(new MediaPriceFact(Arrays.asList("Swiatlowod"), 1000.0));
+
 end
 
 

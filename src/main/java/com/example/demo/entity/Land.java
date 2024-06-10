@@ -1,7 +1,11 @@
 package com.example.demo.entity;
 
+import lombok.Data;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Land {
     private String city;
@@ -10,19 +14,11 @@ public class Land {
     private Long size;
     private boolean regular;
     private List<String> surroundings = new ArrayList<>();
-    private Integer cityMultiplier;
-    private Double mediaPrice;
+    private Map<String, String> cityMap = new HashMap<>();
+    private Map<String, String> mediaMap = new HashMap<>();
+    private Map<String, String> typeMap = new HashMap<>();
     private Double shapeMultiplier;
-    private Double surroundingsPrice;
-    private Double typePrice;
-    private Double sizePrice;
-    private Double waterPrice;
-    private Double gasPrice;
-    private Double powerPrice;
-    private Double sewerPrice;
-    private Double expressPrice;
-    private Double highwayPrice;
-    private Double tarmacPrice;
+
 
     public Double getSizePrice() {
         return sizePrice;
@@ -32,37 +28,42 @@ public class Land {
         this.sizePrice = sizePrice;
     }
 
-    public Integer getCityMultiplier() {
-        return cityMultiplier;
+    private Double sizePrice;
+    private Map<String, String> surroundingsMap = new HashMap<>();
+
+    public Map<String, String> getSurroundingsMap() {
+        return surroundingsMap;
     }
 
-    public void setCityMultiplier(Integer cityMultiplier) {
-        this.cityMultiplier = cityMultiplier;
+    public void setSurroundingsMap(Map<String, String> surroundingsMap) {
+        this.surroundingsMap = surroundingsMap;
+    }
+    public Map<String, String> getCityMap() {
+        return cityMap;
     }
 
-    public Double getMediaPrice() {
-        return mediaPrice;
+    public void setCityMap(Map<String, String> cityMap) {
+        this.cityMap = cityMap;
     }
 
-    public void setMediaPrice(Double mediaPrice) {
-        this.mediaPrice = mediaPrice;
+
+    public Map<String, String> getMediaMap() {
+        return mediaMap;
     }
 
-    public Double getSurroundingsPrice() {
-        return surroundingsPrice;
+    public void setMediaMap(Map<String, String> mediaMap) {
+        this.mediaMap = mediaMap;
     }
 
-    public void setSurroundingsPrice(Double surroundingsPrice) {
-        this.surroundingsPrice = surroundingsPrice;
+    public Map<String, String> getTypeMap() {
+        return typeMap;
     }
 
-    public Double getTypePrice() {
-        return typePrice;
+
+    public void setTypeMap(Map<String, String> typeMap) {
+        this.typeMap = typeMap;
     }
 
-    public void setTypePrice(Double typePrice) {
-        this.typePrice = typePrice;
-    }
 
     public void setRegular(boolean regular) {
         this.regular = regular;
@@ -112,67 +113,11 @@ public class Land {
         this.surroundings = surroundings;
     }
 
-    public Double getShapeMultiplier() {
-        return shapeMultiplier;
-    }
-
-    public void setShapeMultiplier(Double shapeMultiplier) {
+    public void setShapeMultiplier(double shapeMultiplier) {
         this.shapeMultiplier = shapeMultiplier;
     }
 
-    public Double getWaterPrice() {
-        return waterPrice;
-    }
-
-    public void setWaterPrice(Double waterPrice) {
-        this.waterPrice = waterPrice;
-    }
-
-    public Double getGasPrice() {
-        return gasPrice;
-    }
-
-    public void setGasPrice(Double gasPrice) {
-        this.gasPrice = gasPrice;
-    }
-
-    public Double getPowerPrice() {
-        return powerPrice;
-    }
-
-    public void setPowerPrice(Double powerPrice) {
-        this.powerPrice = powerPrice;
-    }
-
-    public Double getSewerPrice() {
-        return sewerPrice;
-    }
-
-    public void setSewerPrice(Double sewerPrice) {
-        this.sewerPrice = sewerPrice;
-    }
-
-    public Double getExpressPrice() {
-        return expressPrice;
-    }
-
-    public void setExpressPrice(Double expressPrice) {
-        this.expressPrice = expressPrice;
-    }
-
-    public Double getHighwayPrice() {
-        return highwayPrice;
-    }
-
-    public void setHighwayPrice(Double highwayPrice) {
-        this.highwayPrice = highwayPrice;
-    }
-
-    public Double getTarmacPrice() {
-        return tarmacPrice;
-    }
-
-    public void setTarmacPrice(Double tarmacPrice) {
-        this.tarmacPrice = tarmacPrice;
+    public Double getShapeMultiplier() {
+        return shapeMultiplier;
     }
 }

@@ -7,24 +7,13 @@ import com.example.demo.prices.*;
 import org.kie.api.runtime.KieSession;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LandService {
     private KieSession kieSession;
 
-    public TypePrice suggestTypePrice(Land land, TypePrice typePrice) {
-        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.TYPE);
-        try {
-            kieSession.insert(land);
-            kieSession.setGlobal("typePrice", typePrice);
-            kieSession.fireAllRules();
-        } finally {
-            kieSession.dispose();
-        }
-        System.out.println(typePrice.getPrice());
-        return typePrice;
-
-    }
 
     public List<LandTypePrice> getTypes(Land land, TypePrice typePrice) {
         kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.TYPE);
@@ -50,22 +39,10 @@ public class LandService {
 
     }
 
-    public MediaPrice suggestMediaPrice(Land land, MediaPrice mediaPrice) {
-        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.MEDIA);
-        try {
-            kieSession.insert(land);
-            kieSession.setGlobal("mediaPrice", mediaPrice);
-            kieSession.fireAllRules();
-        } finally {
-            kieSession.dispose();
-        }
-        System.out.println(mediaPrice.getPrice());
-        return mediaPrice;
-
-    }
 
 
-    public List<MediaPriceFact> getmedia(Land land, MediaPrice mediaPrice) {
+
+    public List<MediaPriceFact> getMedia(Land land, MediaPrice mediaPrice) {
         kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.MEDIA);
         List<MediaPriceFact> mediaPriceFacts = new ArrayList<>();
         try {
@@ -103,18 +80,6 @@ public class LandService {
         return sizePrice;
     }
 
-    public SurroundingsPrice suggestSurroundingsPrice(Land land, SurroundingsPrice surroundingsPrice) {
-        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SURROUNDINGS);
-        try {
-            kieSession.insert(land);
-            kieSession.setGlobal("surroundingsPrice", surroundingsPrice);
-            kieSession.fireAllRules();
-        } finally {
-            kieSession.dispose();
-        }
-        System.out.println(surroundingsPrice.getPrice());
-        return surroundingsPrice;
-    }
 
 
     public List<SurroundingsPriceFact> getSurroundings(Land land, SurroundingsPrice surroundingsPrice) {
@@ -142,19 +107,6 @@ public class LandService {
     }
 
 
-    public CityPrice suggestCityPrice(Land land, CityPrice cityPrice) {
-        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.CITY);
-        try {
-            kieSession.insert(land);
-            kieSession.setGlobal("cityPrice", cityPrice);
-            kieSession.fireAllRules();
-        } finally {
-            kieSession.dispose();
-        }
-        System.out.println(cityPrice.getMultiplier());
-        return cityPrice;
-    }
-
 
     public List<CityMultiplier> getCities(Land land) {
         kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.CITY);
@@ -179,6 +131,29 @@ public class LandService {
         return cities;
     }
 
+    public Map<String, String> getCityMap(Land land) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.CITY);
+        Map<String, String> map = new HashMap<>();
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("cityPrice", new CityPrice());
+
+            kieSession.fireAllRules();
+
+            List<Object> cityMultipliers = new ArrayList<>(kieSession.getObjects());
+
+            for (Object cityMultiplier : cityMultipliers) {
+                if (cityMultiplier instanceof CityMultiplier multiplier) {
+                    map.put(multiplier.getCity(), String.valueOf(multiplier.getMultiplier()));
+                }
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+        return map;
+    }
+
 
     public ShapePrice suggestShapePrice(Land land, ShapePrice shapePrice) {
         kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SHAPE);
@@ -192,4 +167,76 @@ public class LandService {
         System.out.println(shapePrice.getShapeMultiplier());
         return shapePrice;
     }
+
+    public Map<String, String> getMediaMap(Land land) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.MEDIA);
+        Map<String, String> map = new HashMap<>();
+        try {
+            kieSession.setGlobal("mediaPrice", new MediaPrice());
+
+            kieSession.insert(land);
+            kieSession.fireAllRules();
+
+            List<Object> cityMultipliers = new ArrayList<>(kieSession.getObjects());
+
+            for (Object cityMultiplier : cityMultipliers) {
+                if (cityMultiplier instanceof MediaPriceFact multiplier) {
+                    map.put(multiplier.getMediaList().get(0), String.valueOf(multiplier.getPrice()));
+                }
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+        return map;
+    }
+
+    public Map<String, String> getTypeMap(Land land) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.TYPE);
+        Map<String, String> map = new HashMap<>();
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("typePrice", new TypePrice());
+
+            kieSession.fireAllRules();
+
+            List<Object> cityMultipliers = new ArrayList<>(kieSession.getObjects());
+
+            for (Object cityMultiplier : cityMultipliers) {
+                if (cityMultiplier instanceof LandTypePrice multiplier) {
+                    map.put(multiplier.getType(), String.valueOf(multiplier.getPrice()));
+                }
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+        return map;
+    }
+
+
+
+    public Map<String, String> getSurroundingsMap(Land land) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.SURROUNDINGS);
+        Map<String, String> map = new HashMap<>();
+        try {
+            kieSession.insert(land);
+            kieSession.setGlobal("surroundingsPrice", new SurroundingsPrice());
+
+            kieSession.fireAllRules();
+
+            List<Object> cityMultipliers = new ArrayList<>(kieSession.getObjects());
+
+            for (Object cityMultiplier : cityMultipliers) {
+                if (cityMultiplier instanceof SurroundingsPriceFact multiplier) {
+                    map.put(multiplier.getSurroundingsList().get(0), String.valueOf(multiplier.getPrice()));
+                }
+            }
+
+        } finally {
+            kieSession.dispose();
+        }
+        return map;
+    }
+
 }

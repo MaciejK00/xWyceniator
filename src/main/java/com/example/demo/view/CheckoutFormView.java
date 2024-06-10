@@ -2,8 +2,8 @@ package com.example.demo.view;
 
 import com.example.demo.common.CityMultiplier;
 import com.example.demo.common.LandTypePrice;
-import com.example.demo.common.MediaEnum;
-import com.example.demo.common.SurroundingsEnum;
+import com.example.demo.common.MediaPriceFact;
+import com.example.demo.common.SurroundingsPriceFact;
 import com.example.demo.entity.Land;
 import com.example.demo.prices.*;
 import com.example.demo.service.LandService;
@@ -27,21 +27,18 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static com.example.demo.common.CityEnum.*;
 import static com.example.demo.common.Dictionary.*;
-import static com.example.demo.common.MediaEnum.*;
 import static com.example.demo.common.ShapeEnum.IRREGULAR;
 import static com.example.demo.common.ShapeEnum.REGULAR;
-import static com.example.demo.common.SurroundingsEnum.*;
-import static com.example.demo.common.TypeEnum.*;
 
 @PageTitle("Wyceniator")
 @Route("")
 public class CheckoutFormView extends Div {
+    final private LandService mapGetterService = new LandService();
     private Land land;
     private Paragraph paragraph;
     private Button summaryButton;
@@ -101,10 +98,7 @@ public class CheckoutFormView extends Div {
         surroundingsCheckboxGroup.setItems(landService2.getSurroundings(land, surroundingsPrice2).stream().map(obj -> obj.getSurroundingsList().get(0)).toArray(String[]::new));
 
         surroundingsCheckboxGroup.addValueChangeListener(e -> {
-            final LandService landService = new LandService();
             land.setSurroundings(new ArrayList<>(e.getValue()));
-            SurroundingsPrice surroundingsPrice = new SurroundingsPrice();
-            land.setSurroundingsPrice(landService.suggestSurroundingsPrice(land, surroundingsPrice).getPrice());
             paragraph.setText(this.calculatePrice(land).toString());
             this.validateSummaryButton();
         });
@@ -138,10 +132,7 @@ public class CheckoutFormView extends Div {
         radioGroup.setItems(landService2.getTypes(land, typePrice2).stream().map(LandTypePrice::getType).toArray(String[]::new));
 
         radioGroup.addValueChangeListener(e -> {
-            final LandService landService = new LandService();
             land.setType(e.getValue());
-            TypePrice typePrice = new TypePrice();
-            land.setTypePrice(landService.suggestTypePrice(land, typePrice).getPrice());
             paragraph.setText(this.calculatePrice(land).toString());
             this.validateSummaryButton();
         });
@@ -155,13 +146,10 @@ public class CheckoutFormView extends Div {
         LandService landService2 = new LandService();
         MediaPrice mediaPrice2 = new MediaPrice();
 
-        mediaCheckBox.setItems(landService2.getmedia(land, mediaPrice2).stream().map(obj -> obj.getMediaList().get(0)).toArray(String[]::new));
+        mediaCheckBox.setItems(landService2.getMedia(land, mediaPrice2).stream().map(obj -> obj.getMediaList().get(0)).toArray(String[]::new));
 
         mediaCheckBox.addValueChangeListener(e -> {
-            final LandService landService = new LandService();
             land.setMedia(new ArrayList<>(e.getValue()));
-            MediaPrice mediaPrice = new MediaPrice();
-            land.setMediaPrice(landService.suggestMediaPrice(land, mediaPrice).getPrice());
             paragraph.setText(this.calculatePrice(land).toString());
             this.validateSummaryButton();
         });
@@ -175,16 +163,14 @@ public class CheckoutFormView extends Div {
         comboBox.setItems(landService2.getCities(land).stream().map(CityMultiplier::getCity).toList());
 
         comboBox.addValueChangeListener(e -> {
-            final LandService landService = new LandService();
             land.setCity(e.getValue());
-            CityPrice cityPrice = new CityPrice();
-            land.setCityMultiplier(landService.suggestCityPrice(land, cityPrice).getMultiplier());
             paragraph.setText(this.calculatePrice(land).toString());
             this.validateSummaryButton();
         });
 
         return comboBox;
     }
+
 
     private IntegerField prepareSizeField() {
         final IntegerField sizeField = new IntegerField();
@@ -206,19 +192,14 @@ public class CheckoutFormView extends Div {
 
     private Land prepareLand() {
         final Land land = new Land();
-        land.setSizePrice(0.0);
-        land.setCityMultiplier(1);
-        land.setMediaPrice(0.0);
+
+
+        land.setCityMap(this.mapGetterService.getCityMap(land));
+        land.setMediaMap(this.mapGetterService.getMediaMap(land));
+        land.setTypeMap(this.mapGetterService.getTypeMap(land));
+        land.setSurroundingsMap(this.mapGetterService.getSurroundingsMap(land));
         land.setShapeMultiplier(1.0);
-        land.setSurroundingsPrice(0.0);
-        land.setTypePrice(0.0);
-        land.setGasPrice(3000.0);
-        land.setPowerPrice(1000.0);
-        land.setSewerPrice(4000.0);
-        land.setWaterPrice(2000.0);
-        land.setExpressPrice(10000.0);
-        land.setHighwayPrice(20000.0);
-        land.setTarmacPrice(5000.0);
+
         return land;
     }
 
@@ -278,7 +259,7 @@ public class CheckoutFormView extends Div {
     private VerticalLayout createDialogLayout() {
         final HorizontalLayout pricePerMeterHorizontalLayout = new HorizontalLayout();
         final H3 pricePerMeterHeader = new H3(PRICE_PER_METER);
-        final double pricePerMeter = (this.land.getSizePrice() / this.land.getSize()) * this.land.getCityMultiplier();
+        final double pricePerMeter = (this.land.getSizePrice() / this.land.getSize()) * Double.parseDouble(this.land.getCityMap().get(this.land.getCity()));
         final Paragraph price = new Paragraph(Double.toString(pricePerMeter));
         pricePerMeterHorizontalLayout.add(pricePerMeterHeader, price);
 
@@ -307,9 +288,9 @@ public class CheckoutFormView extends Div {
     }
 
     private void prepareInfrastructureSummary(VerticalLayout infrastructureVerticalLayout) {
-        final SurroundingsEnum[] surroundingsList = SurroundingsEnum.values();
-        final Map<SurroundingsEnum, Icon> infrastructureMap = new HashMap<>();
-        for (SurroundingsEnum surroundingsEnum : surroundingsList) {
+        final List<SurroundingsPriceFact> surroundingsList = this.mapGetterService.getSurroundings(this.land, new SurroundingsPrice()).stream().toList();
+        final Map<SurroundingsPriceFact, Icon> infrastructureMap = new HashMap<>();
+        for (SurroundingsPriceFact surroundingsEnum : surroundingsList) {
             final Icon check = VaadinIcon.CHECK.create();
             check.addClassName(CHECK);
             check.setColor(GREEN);
@@ -318,22 +299,14 @@ public class CheckoutFormView extends Div {
             close.addClassName(CLOSE);
             close.setColor(RED);
 
-            infrastructureMap.put(surroundingsEnum, land.getSurroundings().contains(surroundingsEnum.getName()) ? check : close);
+            infrastructureMap.put(surroundingsEnum, land.getSurroundings().contains(surroundingsEnum.getSurroundingsList().get(0)) ? check : close);
         }
-
         infrastructureMap.forEach((k, v) -> {
-            final HorizontalLayout horizontalLayout = new HorizontalLayout();
-            final Text infrastrucutreText = new Text(k.getName());
-            Double infrastructurePrice = 0.0;
-            if (v.getClassNames().contains(CHECK)) {
-                switch (k) {
-                    case EXPRESS -> infrastructurePrice = land.getExpressPrice();
-                    case HIGHWAY -> infrastructurePrice = land.getHighwayPrice();
-                    case TARMAC -> infrastructurePrice = land.getTarmacPrice();
-                }
 
-            }
-            final Text priceText = new Text(" " + infrastructurePrice.toString());
+            final HorizontalLayout horizontalLayout = new HorizontalLayout();
+            final Text infrastrucutreText = new Text(k.getSurroundingsList().get(0));
+            Double infrastructurePrice = 0.0;
+            final Text priceText = new Text(" " + (this.land.getSurroundings().size() != 0 ? this.land.getSurroundingsMap().get(k.getSurroundingsList().get(0)) : infrastructurePrice));
             horizontalLayout.add(v, infrastrucutreText, priceText);
             infrastructureVerticalLayout.add(horizontalLayout);
 
@@ -344,7 +317,7 @@ public class CheckoutFormView extends Div {
         final VerticalLayout typeVerticalLayout = new VerticalLayout();
         final Icon check = VaadinIcon.CHECK.create();
         check.setColor(GREEN);
-        final HorizontalLayout typeHorizontalLayout = new HorizontalLayout(check, new Text(land.getType() + " " + land.getTypePrice()));
+        final HorizontalLayout typeHorizontalLayout = new HorizontalLayout(check, new Text(land.getType() + " " + land.getTypeMap().get(land.getType())));
         typeVerticalLayout.add(typeHorizontalLayout);
         return typeVerticalLayout;
     }
@@ -362,9 +335,9 @@ public class CheckoutFormView extends Div {
     }
 
     private void prepareMediaSummary(VerticalLayout mediaHorizontalLayout) {
-        final MediaEnum[] mediaList = MediaEnum.values();
-        final Map<MediaEnum, Icon> mediaMap = new HashMap<>();
-        for (MediaEnum mediaEnum : mediaList) {
+        final List<MediaPriceFact> mediaList = this.mapGetterService.getMedia(this.land, new MediaPrice());
+        final Map<MediaPriceFact, Icon> mediaMap = new HashMap<>();
+        for (MediaPriceFact mediaEnum : mediaList) {
             final Icon check = VaadinIcon.CHECK.create();
             check.addClassName(CHECK);
             check.setColor(GREEN);
@@ -373,36 +346,41 @@ public class CheckoutFormView extends Div {
             close.addClassName(CLOSE);
             close.setColor(RED);
 
-            mediaMap.put(mediaEnum, land.getMedia().contains(mediaEnum.getName()) ?
+            mediaMap.put(mediaEnum, land.getMedia().contains(mediaEnum.getMediaList().get(0)) ?
                     check : close);
         }
 
         mediaMap.forEach((k, v) -> {
             final HorizontalLayout horizontalLayout = new HorizontalLayout();
-            final Text mediaText = new Text(k.getName());
+            final Text mediaText = new Text(k.getMediaList().get(0));
             Double mediaPrice = 0.0;
-            if (v.getClassNames().contains(CHECK)) {
-                switch (k) {
-                    case POWER -> mediaPrice = land.getPowerPrice();
-                    case WATER -> mediaPrice = land.getWaterPrice();
-                    case GAS -> mediaPrice = land.getGasPrice();
-                    case SEWER -> mediaPrice = land.getSewerPrice();
-                }
-            }
 
-            final Text priceText = new Text(" " + mediaPrice.toString());
+            final Text priceText = new Text(" " + (this.land.getMedia().size() != 0 ? this.land.getMediaMap().get(k.getMediaList().get(0)) : mediaPrice));
+
             horizontalLayout.add(v, mediaText, priceText);
             mediaHorizontalLayout.add(horizontalLayout);
         });
     }
 
     private Double calculatePrice(Land land) {
+        System.out.println(this.land.getMediaMap());
+        System.out.println(this.land.getTypeMap());
+        System.out.println(this.land.getCityMap());
+        System.out.println(this.land.getSurroundingsMap());
+
         final double sizePrice = land.getSizePrice() != null ? land.getSizePrice() : 0.0;
-        final int cityMultiplier = land.getCityMultiplier() != null ? land.getCityMultiplier() : 1;
-        final double mediaPrice = land.getMediaPrice() != null ? land.getMediaPrice() : 0.0;
-        final double typePrice = land.getTypePrice() != null ? land.getTypePrice() : 0.0;
-        final double surroundingsPrice = land.getSurroundingsPrice() != null ? land.getSurroundingsPrice() : 0.0;
+
+        final int cityMultiplier = land.getCityMap().get(land.getCity()) != null ? Integer.parseInt(land.getCityMap().get(land.getCity())) : 1;
+
+        final double mediaPrice = land.getMedia() != null ? land.getMedia().stream().map(media -> land.getMediaMap().get(media)).mapToDouble(Double::parseDouble).sum() : 0.0;
+
+        final double typePrice = land.getType() != null ? Double.parseDouble(land.getTypeMap().get(land.getType())) : 0.0;
+
+
+        final double surroundingsPrice = land.getSurroundings() != null ? land.getSurroundings().stream().map(media -> land.getSurroundingsMap().get(media)).mapToDouble(Double::parseDouble).sum() : 0.0;
+
         final double shapeMultiplier = land.getShapeMultiplier() != null ? land.getShapeMultiplier() : 1.0;
+
 
         return (sizePrice * cityMultiplier + mediaPrice + typePrice + surroundingsPrice) * shapeMultiplier;
     }

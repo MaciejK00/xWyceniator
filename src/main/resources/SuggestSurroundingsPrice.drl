@@ -16,6 +16,7 @@ rule "Define Surroundings Prices"
         insert(new SurroundingsPriceFact(Arrays.asList("Droga ekspresowa"), 10000.0));
         insert(new SurroundingsPriceFact(Arrays.asList("Autostrada"), 20000.0));
         insert(new SurroundingsPriceFact(Arrays.asList("Dojazd utwardzony"), 5000.0));
+        insert(new SurroundingsPriceFact(Arrays.asList("Dojazd droga lesna"), 30.0));
 
 end
 
