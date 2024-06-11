@@ -3,7 +3,9 @@ import com.example.demo.common.CityEnum;
 import com.example.demo.prices.CityPrice;
 import com.example.demo.common.CityMultiplier
 
-global com.example.demo.prices.CityPrice cityPrice;
+
+import com.example.demo.common.TotalPriceFact
+global com.example.demo.common.TotalPriceFact totalPriceFact;
 
 
 rule "Define City Multipliers"
@@ -22,5 +24,13 @@ rule "Set City Price Multiplier"
         $land : Land($city : city)
         $multiplier : CityMultiplier(city == $city)
     then
-        cityPrice.setMultiplier($multiplier.getMultiplier());
+        totalPriceFact.setCityMultiplier($multiplier.getMultiplier());
+end
+
+rule "Re-calculate totalPriceFact after city update"
+    salience -1
+    when
+        $totalPriceFact : TotalPriceFact(cityMultiplier != null) from totalPriceFact
+    then
+        totalPriceFact.calculateTotalPrice();
 end

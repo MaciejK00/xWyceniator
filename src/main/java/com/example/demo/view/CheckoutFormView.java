@@ -1,9 +1,6 @@
 package com.example.demo.view;
 
-import com.example.demo.common.CityMultiplier;
-import com.example.demo.common.LandTypePrice;
-import com.example.demo.common.MediaPriceFact;
-import com.example.demo.common.SurroundingsPriceFact;
+import com.example.demo.common.*;
 import com.example.demo.entity.Land;
 import com.example.demo.prices.*;
 import com.example.demo.service.LandService;
@@ -42,6 +39,7 @@ public class CheckoutFormView extends Div {
     private Land land;
     private Paragraph paragraph;
     private Button summaryButton;
+    private TotalPriceFact totalPriceFact = new TotalPriceFact();
 
     public CheckoutFormView() {
         this.addClassNames(Display.FLEX, FlexDirection.COLUMN, Height.FULL);
@@ -94,12 +92,13 @@ public class CheckoutFormView extends Div {
         final CheckboxGroup<String> surroundingsCheckboxGroup = new CheckboxGroup<>();
         surroundingsCheckboxGroup.setLabel(INFRASTRUCTURE);
         LandService landService2 = new LandService();
-        SurroundingsPrice surroundingsPrice2 = new SurroundingsPrice();
-        surroundingsCheckboxGroup.setItems(landService2.getSurroundings(land, surroundingsPrice2).stream().map(obj -> obj.getSurroundingsList().get(0)).toArray(String[]::new));
+        surroundingsCheckboxGroup.setItems(landService2.getSurroundings(land, totalPriceFact).stream().map(obj -> obj.getSurroundingsList().get(0)).toArray(String[]::new));
 
         surroundingsCheckboxGroup.addValueChangeListener(e -> {
             land.setSurroundings(new ArrayList<>(e.getValue()));
-            paragraph.setText(this.calculatePrice(land).toString());
+            LandService landService = new LandService();
+            landService.getSurroundings(land, totalPriceFact);
+            paragraph.setText(this.calculatePrice().toString());
             this.validateSummaryButton();
         });
 
@@ -114,9 +113,9 @@ public class CheckoutFormView extends Div {
         shapeRadioGroup.addValueChangeListener(e -> {
             final LandService landService = new LandService();
             land.setRegular(e.getValue().equals(REGULAR.getName()));
-            ShapePrice shapePrice = new ShapePrice();
-            land.setShapeMultiplier(landService.suggestShapePrice(land, shapePrice).getShapeMultiplier());
-            paragraph.setText(this.calculatePrice(land).toString());
+
+            land.setShapeMultiplier(landService.suggestShapePrice(land, totalPriceFact));
+            paragraph.setText(this.calculatePrice().toString());
             this.validateSummaryButton();
         });
 
@@ -127,13 +126,14 @@ public class CheckoutFormView extends Div {
         final RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
         radioGroup.setLabel(TYPE);
         LandService landService2 = new LandService();
-        TypePrice typePrice2 = new TypePrice();
 
-        radioGroup.setItems(landService2.getTypes(land, typePrice2).stream().map(LandTypePrice::getType).toArray(String[]::new));
+        radioGroup.setItems(landService2.getTypes(land, totalPriceFact).stream().map(LandTypePrice::getType).toArray(String[]::new));
 
         radioGroup.addValueChangeListener(e -> {
             land.setType(e.getValue());
-            paragraph.setText(this.calculatePrice(land).toString());
+            LandService landService = new LandService();
+            landService.getTypes(land, totalPriceFact);
+            paragraph.setText(this.calculatePrice().toString());
             this.validateSummaryButton();
         });
 
@@ -144,13 +144,14 @@ public class CheckoutFormView extends Div {
         final CheckboxGroup<String> mediaCheckBox = new CheckboxGroup<>();
         mediaCheckBox.setLabel(MEDIA);
         LandService landService2 = new LandService();
-        MediaPrice mediaPrice2 = new MediaPrice();
 
-        mediaCheckBox.setItems(landService2.getMedia(land, mediaPrice2).stream().map(obj -> obj.getMediaList().get(0)).toArray(String[]::new));
+        mediaCheckBox.setItems(landService2.getMedia(land, totalPriceFact).stream().map(obj -> obj.getMediaList().get(0)).toArray(String[]::new));
 
         mediaCheckBox.addValueChangeListener(e -> {
             land.setMedia(new ArrayList<>(e.getValue()));
-            paragraph.setText(this.calculatePrice(land).toString());
+            LandService service = new LandService();
+            service.getMedia(land, totalPriceFact);
+            paragraph.setText(this.calculatePrice().toString());
             this.validateSummaryButton();
         });
 
@@ -160,11 +161,13 @@ public class CheckoutFormView extends Div {
     private ComboBox<String> prepareCityBox() {
         final ComboBox<String> comboBox = new ComboBox<>(CITY);
         LandService landService2 = new LandService();
-        comboBox.setItems(landService2.getCities(land).stream().map(CityMultiplier::getCity).toList());
+        comboBox.setItems(landService2.getCities(land, totalPriceFact).stream().map(CityMultiplier::getCity).toList());
 
         comboBox.addValueChangeListener(e -> {
             land.setCity(e.getValue());
-            paragraph.setText(this.calculatePrice(land).toString());
+            LandService service = new LandService();
+            service.getCities(land, totalPriceFact);
+            paragraph.setText(this.calculatePrice().toString());
             this.validateSummaryButton();
         });
 
@@ -181,9 +184,8 @@ public class CheckoutFormView extends Div {
         sizeField.addValueChangeListener(e -> {
             final LandService landService = new LandService();
             land.setSize(e.getValue().longValue());
-            SizePrice sizePrice = new SizePrice();
-            land.setSizePrice(landService.suggestSizePrice(land, sizePrice).getPrice());
-            paragraph.setText(this.calculatePrice(land).toString());
+            land.setSizePrice(landService.suggestSizePrice(land, totalPriceFact));
+            paragraph.setText(this.calculatePrice().toString());
             this.validateSummaryButton();
         });
 
@@ -194,10 +196,10 @@ public class CheckoutFormView extends Div {
         final Land land = new Land();
 
 
-        land.setCityMap(this.mapGetterService.getCityMap(land));
-        land.setMediaMap(this.mapGetterService.getMediaMap(land));
-        land.setTypeMap(this.mapGetterService.getTypeMap(land));
-        land.setSurroundingsMap(this.mapGetterService.getSurroundingsMap(land));
+        land.setCityMap(this.mapGetterService.getCityMap(land, totalPriceFact));
+        land.setMediaMap(this.mapGetterService.getMediaMap(land, totalPriceFact));
+        land.setTypeMap(this.mapGetterService.getTypeMap(land, totalPriceFact));
+        land.setSurroundingsMap(this.mapGetterService.getSurroundingsMap(land, totalPriceFact));
         land.setShapeMultiplier(1.0);
 
         return land;
@@ -288,7 +290,7 @@ public class CheckoutFormView extends Div {
     }
 
     private void prepareInfrastructureSummary(VerticalLayout infrastructureVerticalLayout) {
-        final List<SurroundingsPriceFact> surroundingsList = this.mapGetterService.getSurroundings(this.land, new SurroundingsPrice()).stream().toList();
+        final List<SurroundingsPriceFact> surroundingsList = this.mapGetterService.getSurroundings(this.land, totalPriceFact).stream().toList();
         final Map<SurroundingsPriceFact, Icon> infrastructureMap = new HashMap<>();
         for (SurroundingsPriceFact surroundingsEnum : surroundingsList) {
             final Icon check = VaadinIcon.CHECK.create();
@@ -335,7 +337,7 @@ public class CheckoutFormView extends Div {
     }
 
     private void prepareMediaSummary(VerticalLayout mediaHorizontalLayout) {
-        final List<MediaPriceFact> mediaList = this.mapGetterService.getMedia(this.land, new MediaPrice());
+        final List<MediaPriceFact> mediaList = this.mapGetterService.getMedia(this.land, totalPriceFact);
         final Map<MediaPriceFact, Icon> mediaMap = new HashMap<>();
         for (MediaPriceFact mediaEnum : mediaList) {
             final Icon check = VaadinIcon.CHECK.create();
@@ -362,27 +364,8 @@ public class CheckoutFormView extends Div {
         });
     }
 
-    private Double calculatePrice(Land land) {
-        System.out.println(this.land.getMediaMap());
-        System.out.println(this.land.getTypeMap());
-        System.out.println(this.land.getCityMap());
-        System.out.println(this.land.getSurroundingsMap());
-
-        final double sizePrice = land.getSizePrice() != null ? land.getSizePrice() : 0.0;
-
-        final int cityMultiplier = land.getCityMap().get(land.getCity()) != null ? Integer.parseInt(land.getCityMap().get(land.getCity())) : 1;
-
-        final double mediaPrice = land.getMedia() != null ? land.getMedia().stream().map(media -> land.getMediaMap().get(media)).mapToDouble(Double::parseDouble).sum() : 0.0;
-
-        final double typePrice = land.getType() != null ? Double.parseDouble(land.getTypeMap().get(land.getType())) : 0.0;
-
-
-        final double surroundingsPrice = land.getSurroundings() != null ? land.getSurroundings().stream().map(media -> land.getSurroundingsMap().get(media)).mapToDouble(Double::parseDouble).sum() : 0.0;
-
-        final double shapeMultiplier = land.getShapeMultiplier() != null ? land.getShapeMultiplier() : 1.0;
-
-
-        return (sizePrice * cityMultiplier + mediaPrice + typePrice + surroundingsPrice) * shapeMultiplier;
+    private Double calculatePrice() {
+        return totalPriceFact.getTotalPrice();
     }
 
     private void validateSummaryButton() {

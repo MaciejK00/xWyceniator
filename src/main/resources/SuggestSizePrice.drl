@@ -1,10 +1,21 @@
 import com.example.demo.entity.Land;
 global com.example.demo.prices.SizePrice sizePrice;
 
+import com.example.demo.common.TotalPriceFact
+global com.example.demo.common.TotalPriceFact totalPriceFact;
+
 rule "Square Meter price"
 when
     $land : Land(size > 0)
 then
     double pricePerMeter = 100.0 * $land.getSize();
-    sizePrice.setPrice(pricePerMeter);
+    totalPriceFact.setSizePrice(pricePerMeter);
+end
+
+rule "Re-calculate totalPriceFact after size update"
+    salience -1
+    when
+        $totalPriceFact : TotalPriceFact(sizePrice != null) from totalPriceFact
+    then
+        totalPriceFact.calculateTotalPrice();
 end

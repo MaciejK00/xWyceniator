@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import com.example.demo.common.SurroundingsPriceFact
 
-global com.example.demo.prices.SurroundingsPrice surroundingsPrice;
+import com.example.demo.common.TotalPriceFact
+global com.example.demo.common.TotalPriceFact totalPriceFact;
 
 
 rule "Define Surroundings Prices"
@@ -31,5 +32,13 @@ rule "Sum Media Prices"
             $total : sum($price2)
         )
     then
-        surroundingsPrice.setPrice((double)$total);
+        totalPriceFact.setSurroundingsPrice((double)$total);
+end
+
+rule "Re-calculate totalPriceFact after surroundings update"
+    salience -1
+    when
+        $totalPriceFact : TotalPriceFact(surroundingsPrice != null) from totalPriceFact
+    then
+        totalPriceFact.calculateTotalPrice();
 end

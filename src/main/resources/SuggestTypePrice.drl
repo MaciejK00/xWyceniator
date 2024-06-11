@@ -3,7 +3,8 @@ import com.example.demo.prices.TypePrice;
 import com.example.demo.common.TypeEnum;
 import com.example.demo.common.LandTypePrice;
 
-global com.example.demo.prices.TypePrice typePrice;
+import com.example.demo.common.TotalPriceFact
+global com.example.demo.common.TotalPriceFact totalPriceFact;
 
 rule "Init data"
     when
@@ -14,8 +15,6 @@ rule "Init data"
         insert(new LandTypePrice("Rekreacyjna", 20000.0));
         insert(new LandTypePrice("Inwestycyjna", 2000.0));
         insert(new LandTypePrice("Siedliskowa", 3500.0));
-        insert(new LandTypePrice("super", 3000.0));
-        insert(new LandTypePrice("tibijska", 5000.0));
 end
 
 rule "Type price"
@@ -23,5 +22,13 @@ rule "Type price"
         Land($type : type)
         LandTypePrice(type == $type, $price : price)
     then
-        typePrice.setPrice($price);
+        totalPriceFact.setTypePrice($price);
+end
+
+rule "Re-calculate totalPriceFact after type update"
+    salience -1
+    when
+        $totalPriceFact : TotalPriceFact(typePrice != null) from totalPriceFact
+    then
+        totalPriceFact.calculateTotalPrice();
 end
