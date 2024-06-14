@@ -6,7 +6,8 @@ public enum RulesEnum {
     TYPE("SuggestTypePrice.drl"),
     CITY("SuggestCityPrice.drl"),
     SHAPE("SuggestShapePrice.drl"),
-    SURROUNDINGS("SuggestSurroundingsPrice.drl");
+    SURROUNDINGS("SuggestSurroundingsPrice.drl"),
+    RECALCULATED("RecalculatePrice.drl");
 
     final String fileName;
 

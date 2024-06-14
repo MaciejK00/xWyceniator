@@ -25,12 +25,5 @@ rule "Set City Price Multiplier"
         $multiplier : CityMultiplier(city == $city)
     then
         totalPriceFact.setCityMultiplier($multiplier.getMultiplier());
-end
-
-rule "Re-calculate totalPriceFact after city update"
-    salience -1
-    when
-        $totalPriceFact : TotalPriceFact(cityMultiplier != null) from totalPriceFact
-    then
-        totalPriceFact.calculateTotalPrice();
+        totalPriceFact.setNeedRecalculation(true);
 end

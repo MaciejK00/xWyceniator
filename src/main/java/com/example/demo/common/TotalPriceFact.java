@@ -13,6 +13,7 @@ public class TotalPriceFact {
 
     double shapeMultiplier = 1.0;
     double totalPrice = 0.0;
+    boolean needRecalculation = false;
 
     public double getSizePrice() {
         return sizePrice;
@@ -62,13 +63,20 @@ public class TotalPriceFact {
         this.shapeMultiplier = shapeMultiplier;
     }
 
-    public void calculateTotalPrice() {
-        totalPrice = (this.getSizePrice() * this.getCityMultiplier() + this.getMediaPrice() + this.getTypePrice()
-                + this.getSurroundingsPrice()) * this.getShapeMultiplier();
-    }
-
     public double getTotalPrice() {
         return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public boolean isNeedRecalculation() {
+        return needRecalculation;
+    }
+
+    public void setNeedRecalculation(boolean needRecalculation) {
+        this.needRecalculation = needRecalculation;
     }
 
     @Override

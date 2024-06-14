@@ -23,12 +23,5 @@ rule "Type price"
         LandTypePrice(type == $type, $price : price)
     then
         totalPriceFact.setTypePrice($price);
-end
-
-rule "Re-calculate totalPriceFact after type update"
-    salience -1
-    when
-        $totalPriceFact : TotalPriceFact(typePrice != null) from totalPriceFact
-    then
-        totalPriceFact.calculateTotalPrice();
+        totalPriceFact.setNeedRecalculation(true);
 end

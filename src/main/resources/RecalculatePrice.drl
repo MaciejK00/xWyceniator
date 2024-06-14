@@ -1,0 +1,13 @@
+import com.example.demo.common.TotalPriceFact;
+
+global com.example.demo.common.TotalPriceFact totalPriceFact;
+
+rule "RecalculatePrice"
+    when
+        $totalPriceFact : TotalPriceFact(needRecalculation == true) from totalPriceFact
+    then
+        $totalPriceFact.setTotalPrice(
+                ($totalPriceFact.getSizePrice() * $totalPriceFact.getCityMultiplier() + $totalPriceFact.getMediaPrice()
+                 + $totalPriceFact.getTypePrice() + $totalPriceFact.getSurroundingsPrice()) * $totalPriceFact.getShapeMultiplier());
+        $totalPriceFact.setNeedRecalculation(false);
+end

@@ -10,12 +10,5 @@ when
 then
     double pricePerMeter = 100.0 * $land.getSize();
     totalPriceFact.setSizePrice(pricePerMeter);
-end
-
-rule "Re-calculate totalPriceFact after size update"
-    salience -1
-    when
-        $totalPriceFact : TotalPriceFact(sizePrice != null) from totalPriceFact
-    then
-        totalPriceFact.calculateTotalPrice();
+    totalPriceFact.setNeedRecalculation(true);
 end

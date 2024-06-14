@@ -365,7 +365,8 @@ public class CheckoutFormView extends Div {
     }
 
     private Double calculatePrice() {
-        return totalPriceFact.getTotalPrice();
+        LandService landService = new LandService();
+        return landService.recalculate(totalPriceFact);
     }
 
     private void validateSummaryButton() {

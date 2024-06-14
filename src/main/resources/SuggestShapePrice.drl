@@ -26,12 +26,5 @@ rule "Set Shape Price"
         $priceFact : ShapePriceFact(regular == $regular, $multiplier : multiplier)
     then
         totalPriceFact.setShapeMultiplier($multiplier);
-end
-
-rule "Re-calculate totalPriceFact after shape update"
-    salience -1
-    when
-        $totalPriceFact : TotalPriceFact(shapeMultiplier != null) from totalPriceFact
-    then
-        totalPriceFact.calculateTotalPrice();
+        totalPriceFact.setNeedRecalculation(true);
 end

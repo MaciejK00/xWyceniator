@@ -37,13 +37,5 @@ rule "Sum Media Prices"
         )
     then
         totalPriceFact.setMediaPrice((double)$total);
-
-end
-
-rule "Re-calculate totalPriceFact after media update"
-    salience -1
-    when
-        $totalPriceFact : TotalPriceFact(mediaPrice != null) from totalPriceFact
-    then
-        totalPriceFact.calculateTotalPrice();
+        totalPriceFact.setNeedRecalculation(true);
 end

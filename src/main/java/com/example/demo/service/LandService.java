@@ -238,4 +238,16 @@ public class LandService {
         return map;
     }
 
+    public Double recalculate(TotalPriceFact totalPriceFact) {
+        kieSession = new DroolsBeanFactory().getKieSession(RulesEnum.RECALCULATED);
+        try {
+            kieSession.setGlobal("totalPriceFact", totalPriceFact);
+            kieSession.fireAllRules();
+        } finally {
+            kieSession.dispose();
+        }
+
+        return totalPriceFact.getTotalPrice();
+    }
+
 }
